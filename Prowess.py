@@ -42,7 +42,7 @@ headshots = 0
 legshots = 0
 bodyshots = 0
 latest_match_ts = 0
-last_round_played = 0
+last_round_played = -1
 
 
 # ## Get Latest Matches
@@ -95,6 +95,8 @@ new_bodyshots = 0
 
 ## looping through latest matches, creating an API call for each, and storing relevant data
 for match in sorted_latest_matches['history']:
+    if match['gameStartTimeMillis'] > latest_match_ts:
+        new_user_games_played += 1
     if match['gameStartTimeMillis'] >= latest_match_ts:
         latest_match_ts = match['gameStartTimeMillis']
         print('latest_match_ts', latest_match_ts)
@@ -123,11 +125,9 @@ for match in sorted_latest_matches['history']:
                     new_user_games_won += 1
                     break
         for match_round in match_data['roundResults']: ##storing last round number to avoid double counting
-            print ('last_round_played', last_round_played, 'current round is ',match_data['roundResults'][0]['roundNum'])
-            if  match['gameStartTimeMillis'] == latest_match_ts and last_round_played < match_data['roundResults'][0]['roundNum']:
-                last_round_played = match_data['roundResults'][0]['roundNum']
-                break
-                new_user_games_played = new_user_games_played + 1
+            print ('last_round_played', last_round_played, 'current round is ',match_round['roundNum'])
+            if  match['gameStartTimeMillis'] == latest_match_ts and last_round_played < match_round['roundNum']:
+                last_round_played = match_round['roundNum']
                 for match_round_player_stats in match_data['roundResults'][0]['playerStats']: ##getting damage to calculate headshot%
                     if match_round_player_stats['puuid'] == puuid:
                         user_round_data = match_round_player_stats
@@ -138,9 +138,9 @@ for match in sorted_latest_matches['history']:
                             new_legshots = new_legshots + damage_per_round['legshots']
                             break
     
-    print('stats', new_user_kills, new_user_deaths, new_user_assists, new_user_games_won, new_user_games_played)
-    print('headshots', new_headshots, 'bodyshots', new_bodyshots, 'legshots', new_legshots)
-    print('-----------------------------')
+        print('stats', new_user_kills, new_user_deaths, new_user_assists, new_user_games_won, new_user_games_played)
+        print('headshots', new_headshots, 'bodyshots', new_bodyshots, 'legshots', new_legshots)
+        print('-----------------------------')
         
 
 
