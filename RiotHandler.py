@@ -15,13 +15,12 @@ class RiotHandler:
             game_name, tag_line)
         return requests.get(url, headers={'X-Riot-Token': self.token})
 
-    def get_data(self, region, puuid):
+    def get_match_list(self, region, puuid):
         url = 'https://{}.api.riotgames.com/val/match/v1/matchlists/by-puuid/{}'.format(
             region, puuid)
         return requests.get(url, headers={'X-Riot-Token': self.token})
 
-# {
-#     "puuid": "EE8A-dek_wW2K9vwp7SrtdVq8GZ7glvOtKnLEL5gcO6HsOpQoFnlr2F7UMS4Nk7rO1cz-JkvaZ36YQ",
-#     "gameName": "SettMyAssOnFire",
-#     "tagLine": "EUW"
-# }
+    def get_match_data(self, region, match_id):
+        url = 'https://{}.api.riotgames.com/val/match/v1/matches/{}'.format(
+            region, match_id)
+        return requests.get(url, headers={'X-Riot-Token': self.token})

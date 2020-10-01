@@ -35,7 +35,6 @@ headers = {
 
 latest_matches = requests.get('https://'+region+'.api.riotgames.com/val/match/v1/matchlists/by-puuid/'+puuid, headers=headers)
 latest_matches = latest_matches.json()
-pprint(latest_matches)
 
 ## Sorting the latest matches so the oldest match comes first, this is needed for the next step where we filter for older matches that were already proccessed
 
@@ -67,7 +66,7 @@ for match in sorted_latest_matches['history']:
         matchId = match['matchId']
         print('matchId', matchId)
         time.sleep(5)
-        match_data = requests.get('https://eu.api.riotgames.com/val/match/v1/matches/'+matchId, headers=headers) 
+         
         match_data = match_data.json()
         for player in match_data['players']: ##getting match KDA and team from player section
             if player['puuid'] == puuid:
@@ -101,12 +100,6 @@ for match in sorted_latest_matches['history']:
                             new_bodyshots = new_bodyshots + damage_per_round['bodyshots']
                             new_legshots = new_legshots + damage_per_round['legshots']
                             break
-    
-        print('stats', new_user_kills, new_user_deaths, new_user_assists, new_user_games_won, new_user_games_played)
-        print('headshots', new_headshots, 'bodyshots', new_bodyshots, 'legshots', new_legshots)
-        print('-----------------------------')
-        
-
 
 user_kills = user_kills + new_user_kills  
 user_deaths = new_user_deaths + user_deaths
