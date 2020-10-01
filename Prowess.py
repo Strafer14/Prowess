@@ -1,9 +1,3 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# In[1]:
-
-
 import requests
 from urllib import request
 import json
@@ -12,25 +6,12 @@ import time
 import os
 import operator
 
-
-# ## Get User Info
-
-# In[2]:
-
-
+## Get User Info
 token = os.environ.get('ENV_VAR')
-
-
-# In[5]:
-
 
 ##actual values to be recieved from client
 puuid = "EE8A-dek_wW2K9vwp7SrtdVq8GZ7glvOtKnLEL5gcO6HsOpQoFnlr2F7UMS4Nk7rO1cz-JkvaZ36YQ"
 region = "eu"
-
-
-# In[34]:
-
 
 ## agrregated metrics that shouldn't be restarted on every run
 user_kills = 0
@@ -44,11 +25,7 @@ bodyshots = 0
 latest_match_ts = 0
 last_round_played = -1
 
-
-# ## Get Latest Matches
-
-# In[7]:
-
+## Get Latest Matches
 
 headers = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36",
@@ -62,24 +39,12 @@ latest_matches = requests.get('https://'+region+'.api.riotgames.com/val/match/v1
 latest_matches = latest_matches.json()
 pprint(latest_matches)
 
-
-# In[9]:
-
-
 ## Sorting the latest matches so the oldest match comes first, this is needed for the next step where we filter for older matches that were already proccessed
 
 sorted_latest_matches = dict(latest_matches) 
 sorted_latest_matches['history'] = sorted(sorted_latest_matches['history'], key=lambda x : x['gameStartTimeMillis'], reverse=False)
 
 pprint(sorted_latest_matches)
-
-
-# ## Get Matches Data
-
-# In[40]:
-
-
-##unresolved problem: currently active match stats are aggregating. Need to only take data from new rounds in the match.
 
 ## setting up metrics to be filled later
 new_user_kills = 0 
@@ -91,7 +56,6 @@ match_won_status = 'null'
 new_headshots = 0
 new_legshots = 0
 new_bodyshots = 0
-
 
 ## looping through latest matches, creating an API call for each, and storing relevant data
 for match in sorted_latest_matches['history']:
@@ -154,11 +118,6 @@ legshots = new_legshots + legshots
 bodyshots = new_bodyshots + bodyshots
 
 
-# ## Calculate metrics from data
-
-# In[36]:
-
-
 win_rate = round((user_games_won/user_games_played)*100,2)
 print('win rate is', win_rate)
 
@@ -169,10 +128,3 @@ print('K/D/A is', user_kills,'/', user_deaths,'/',user_assists)
 
 kd_ratio = round(user_kills/user_deaths,2)
 print('KD ratio is', kd_ratio)
-
-
-# In[ ]:
-
-
-
-
