@@ -15,7 +15,7 @@ class RiotHandler:
             game_name, tag_line)
         return requests.get(url, headers={'X-Riot-Token': self.token})
 
-    def get_data(self, region, puuid)
+    def get_data(self, region, puuid):
         url = 'https://{}.api.riotgames.com/val/match/v1/matchlists/by-puuid/{}'.format(
             region, puuid)
         return requests.get(url, headers={'X-Riot-Token': self.token})
