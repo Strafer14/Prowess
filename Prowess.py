@@ -7,6 +7,7 @@ import os
 import operator
 
 ## Get User Info
+
 token = os.environ.get('ENV_VAR')
 
 ##actual values to be recieved from client
@@ -45,6 +46,9 @@ sorted_latest_matches = dict(latest_matches)
 sorted_latest_matches['history'] = sorted(sorted_latest_matches['history'], key=lambda x : x['gameStartTimeMillis'], reverse=False)
 
 pprint(sorted_latest_matches)
+
+
+## Get Matches Data
 
 ## setting up metrics to be filled later
 new_user_kills = 0 
@@ -118,6 +122,8 @@ legshots = new_legshots + legshots
 bodyshots = new_bodyshots + bodyshots
 
 
+## Calculate metrics from data
+
 win_rate = round((user_games_won/user_games_played)*100,2)
 print('win rate is', win_rate)
 
@@ -127,4 +133,8 @@ print('headshot rate is', headshot_rate)
 print('K/D/A is', user_kills,'/', user_deaths,'/',user_assists)
 
 kd_ratio = round(user_kills/user_deaths,2)
+
 print('KD ratio is', kd_ratio)
+
+print('KD ratio is', kd_ratio)
+
