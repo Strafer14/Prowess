@@ -1,18 +1,11 @@
+from os import environ
 import requests
 from urllib import request
 import json
 from pprint import pprint
 import time
-import os
 import operator
-
-## Get User Info
-
-token = os.environ.get('ENV_VAR')
-
-##actual values to be recieved from client
-puuid = "EE8A-dek_wW2K9vwp7SrtdVq8GZ7glvOtKnLEL5gcO6HsOpQoFnlr2F7UMS4Nk7rO1cz-JkvaZ36YQ"
-region = "eu"
+from RiotHandler import RiotHandler
 
 ## agrregated metrics that shouldn't be restarted on every run
 user_kills = 0
@@ -26,19 +19,22 @@ bodyshots = 0
 latest_match_ts = 0
 last_round_played = -1
 
-## Get Latest Matches
+## values to be recieved from user
+gameName = "SettMyAssOnFire"
+tagLine = "EUW"
+region = "eu"
 
-headers = {
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36",
-    "Accept-Language": "en,en-US;q=0.9,ru;q=0.8,he;q=0.7,es;q=0.6",
-    "Accept-Charset": "application/x-www-form-urlencoded; charset=UTF-8",
-    "Origin": "https://developer.riotgames.com/",
-    "X-Riot-Token": token
-        }
+#getting API token
+riot_handle = RiotHandler()
 
-latest_matches = requests.get('https://'+region+'.api.riotgames.com/val/match/v1/matchlists/by-puuid/'+puuid, headers=headers)
+#getting puuid
+get_puuid = RiotHandler.get_puuid(riot_handle,gameName,tagLine) #real values to be recieved from user
+get_puuid = get_puuid.json()
+puuid = get_puuid['puuid']
+
+#getting a list of the user's latest matches
+latest_matches = RiotHandler.get_data(riot_handle,region,puuid)#real values to be recieved from user
 latest_matches = latest_matches.json()
-pprint(latest_matches)
 
 ## Sorting the latest matches so the oldest match comes first, this is needed for the next step where we filter for older matches that were already proccessed
 
@@ -46,9 +42,6 @@ sorted_latest_matches = dict(latest_matches)
 sorted_latest_matches['history'] = sorted(sorted_latest_matches['history'], key=lambda x : x['gameStartTimeMillis'], reverse=False)
 
 pprint(sorted_latest_matches)
-
-
-## Get Matches Data
 
 ## setting up metrics to be filled later
 new_user_kills = 0 
@@ -71,7 +64,7 @@ for match in sorted_latest_matches['history']:
         matchId = match['matchId']
         print('matchId', matchId)
         time.sleep(5)
-        match_data = requests.get('https://eu.api.riotgames.com/val/match/v1/matches/'+matchId, headers=headers) 
+#        match_data = requests.get('https://eu.api.riotgames.com/val/match/v1/matches/'+matchId, headers=headers) 
         match_data = match_data.json()
         for player in match_data['players']: ##getting match KDA and team from player section
             if player['puuid'] == puuid:
