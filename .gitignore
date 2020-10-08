@@ -2,6 +2,7 @@
 __pycache__/
 *.py[cod]
 *$py.class
+Prowess.ipynb 
 
 # C extensions
 *.so
