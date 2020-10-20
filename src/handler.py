@@ -12,6 +12,12 @@ def main(event, context):
         "body": json.dumps(body)
     }
 
+    # handle websocket messages
+    # messages like connected -> starting session
+    # reconnected -> connecting to existing session_id
+    # while player is connected he gets a response every 60 seconds (might skip sometimes due to rate limit) that updates his stats
+    # on disconnect -> end player session
+
     return response
 
     # Use this code if you don't use the http event with the LAMBDA-PROXY
