@@ -1,9 +1,16 @@
 from functools import reduce
 
 
+def __extract_relevant_player__(players_data, puuid):
+    relevant_player_list = [x for x in players_data if x.get('puuid') == puuid]
+    if len(relevant_player_list) > 0:
+        return relevant_player_list[0]
+    return {}
+
+
 def __analyze_player_score__(match, puuid):
     players_data = match.get('players', [])
-    relevant_player = next(filter(lambda x: x['puuid'] == puuid, players_data))
+    relevant_player = __extract_relevant_player__(players_data, puuid)
     return relevant_player.get('stats', {
         "score": 0,
         "roundsPlayed": 0,
@@ -18,7 +25,7 @@ def __analyze_player_score__(match, puuid):
 def __analyze_player_aim__(match, puuid):
     def reduce_results(acc, val):
         players = val['playerStats']
-        relevant_player = next(filter(lambda x: x['puuid'] == puuid, players))
+        relevant_player = __extract_relevant_player__(players, puuid)
         for damage_instance in relevant_player['damage']:
             acc["legshots"] += damage_instance["legshots"]
             acc["bodyshots"] += damage_instance["bodyshots"]
@@ -34,7 +41,7 @@ def __analyze_player_aim__(match, puuid):
 
 def __analyze_match_over_score__(match, puuid):
     players_data = match.get('players', [])
-    relevant_player = next(filter(lambda x: x['puuid'] == puuid, players_data))
+    relevant_player = __extract_relevant_player__(players_data, puuid)
     team_id = relevant_player['teamId']
     players_team = next(
         filter(lambda x: x['teamId'] == team_id), match['teams'])
