@@ -15,16 +15,16 @@ class RiotHandler:
     def get_puuid(self, game_name, tag_line):
         url = 'https://americas.api.riotgames.com/riot/account/v1/accounts/by-riot-id/{}/{}'.format(
             game_name, tag_line)
-        return make_request(url, self.token)
+        return (make_request(url, self.token)).text
 
     def get_matches_list(self, region, puuid):
         url = 'https://{}.api.riotgames.com/val/match/v1/matchlists/by-puuid/{}'.format(
             region, puuid)
-        return make_request(url, self.token)
+        return (make_request(url, self.token)).text
 
     def get_match_data(self, match_id):
         url = ''
-        return make_request(url, self.token)
+        return (make_request(url, self.token)).text
 
 # {
 #     "puuid": "EE8A-dek_wW2K9vwp7SrtdVq8GZ7glvOtKnLEL5gcO6HsOpQoFnlr2F7UMS4Nk7rO1cz-JkvaZ36YQ",

@@ -60,6 +60,10 @@ provider:
 functions:
   get_puuid:
     handler: handler.main
+    events:
+      - http:
+          path: user/get_puuid
+          method: get
 #    The following are a few example events you can configure
 #    NOTE: Please make sure to change your handler code to work with those events
 #    Check the event documentation for details
@@ -114,6 +118,7 @@ functions:
 
 plugins:
   - serverless-python-requirements
+  - serverless-offline
 
 custom:
   pythonRequirements:
