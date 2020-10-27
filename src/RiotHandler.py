@@ -1,8 +1,10 @@
 import requests
 from os import environ
 
+
 def make_request(url, token):
     return requests.get(url, headers={'X-Riot-Token': token})
+
 
 class RiotHandler:
     def __init__(self):
@@ -22,12 +24,7 @@ class RiotHandler:
             region, puuid)
         return (make_request(url, self.token)).text
 
-    def get_match_data(self, match_id):
-        url = ''
+    def get_match_data(self, region, match_id):
+        url = 'https://{}.api.riotgames.com/val/match/v1/matches/{}'.format(
+            region, match_id)
         return (make_request(url, self.token)).text
-
-# {
-#     "puuid": "EE8A-dek_wW2K9vwp7SrtdVq8GZ7glvOtKnLEL5gcO6HsOpQoFnlr2F7UMS4Nk7rO1cz-JkvaZ36YQ",
-#     "gameName": "SettMyAssOnFire",
-#     "tagLine": "EUW"
-# }
