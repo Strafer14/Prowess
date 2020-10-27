@@ -5,9 +5,9 @@ from os import environ
 
 
 def main(event, context):
-    query_params = event.get("multiValueQueryStringParameters")
-    game_name = query_params.get("gameName", [''])[0]
-    tag_line = query_params.get("tagLine", [''])[0]
+    query_params = event.get('pathParameters', {})
+    game_name = query_params.get("gameName")
+    tag_line = query_params.get("tagLine")
     r = redis.Redis(host=environ.get('REDIS_URL'), db=0)
     redis_puuid = r.get('{}#{}'.format(game_name, tag_line))
     if redis_puuid is not None:

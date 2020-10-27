@@ -62,12 +62,13 @@ functions:
     handler: handler.main
     events:
       - http:
-          path: api/v1/users/{userId}
+          path: api/v1/users/{tagLine}/{gameName}
           method: get
           request:
             parameters:
               paths:
-                userId: true
+                tagLine: true
+                gameName: true
   data:
     handler: data_handler.main
     events:
