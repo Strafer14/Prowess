@@ -1,5 +1,5 @@
 import unittest
-from src.Analyze import get_match_results
+from src.match_analyzer import get_match_results
 import json
 import os
 
