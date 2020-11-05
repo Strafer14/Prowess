@@ -73,8 +73,19 @@ functions:
     handler: data_handler.main
     events:
       - http:
+          path: api/v1/data/{puuid}/{session_id}
+          method: put
+          request:
+            parameters:
+              paths:
+                puuid: true
+                session_id: true
+  session:
+    handler: session_handler.main
+    events:
+      - http:
           path: api/v1/data/{puuid}
-          method: get
+          method: post
           request:
             parameters:
               paths:
