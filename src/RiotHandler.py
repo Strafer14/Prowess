@@ -1,9 +1,6 @@
 import requests
 from os import environ
-
-
-def make_request(url, token):
-    return requests.get(url, headers={'X-Riot-Token': token})
+from ratelimit import limits
 
 
 class RiotHandler:
@@ -13,28 +10,25 @@ class RiotHandler:
             raise Exception(
                 "The VALORANT_API_KEY environment variable is missing")
         self.token = token
-        self.requests_made = 0
 
-    def __update_requests_amount__(self):
-        self.requests_made += 1
+    @limits(calls=100, period=60)
+    def __make_request(self, url):
+        response = requests.get(url, headers={'X-Riot-Token': self.token})
+        if response.status_code != 200:
+            raise Exception('API response - {}: {}'.format(response.status_code, response.text))
+        return response
 
     def get_puuid(self, game_name, tag_line):
-        self.__update_requests_amount__()
         url = 'https://americas.api.riotgames.com/riot/account/v1/accounts/by-riot-id/{}/{}'.format(
             game_name, tag_line)
-        if self.requests_made >= 100: return
-        return (make_request(url, self.token)).text
+        return (self.make_request(url)).text
 
     def get_matches_list(self, region, puuid):
-        self.__update_requests_amount__()
         url = 'https://{}.api.riotgames.com/val/match/v1/matchlists/by-puuid/{}'.format(
             region, puuid)
-        if self.requests_made >= 100: return
-        return (make_request(url, self.token)).text
+        return (self.make_request(url)).text
 
     def get_match_data(self, region, match_id):
-        self.__update_requests_amount__()
         url = 'https://{}.api.riotgames.com/val/match/v1/matches/{}'.format(
             region, match_id)
-        if self.requests_made >= 100: return
-        return (make_request(url, self.token)).text
+        return (self.make_request(url)).text
