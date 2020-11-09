@@ -59,7 +59,7 @@ provider:
 
 functions:
   puuid:
-    handler: handler.main
+    handler: get_puuid.main
     events:
       - http:
           path: api/v1/users/{tagLine}/{gameName}
@@ -70,24 +70,16 @@ functions:
                 tagLine: true
                 gameName: true
   data:
-    handler: data_handler.main
-    events:
-      - http:
-          path: api/v1/data/{puuid}/{session_id}
-          method: put
-          request:
-            parameters:
-              paths:
-                puuid: true
-                session_id: true
-  session:
-    handler: session_handler.main
+    handler: update_and_retrieve_data.main
     events:
       - http:
           path: api/v1/data/{puuid}
           method: post
           request:
             parameters:
+              querystrings:
+                session_id: false
+                region: true
               paths:
                 puuid: true
 
