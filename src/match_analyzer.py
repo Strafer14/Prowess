@@ -39,16 +39,29 @@ def __analyze_player_aim__(match, puuid):
     })
 
 
-def __analyze_match_over_score__(match, puuid):
+def __analyze_match_metadata__(match, puuid):
     players_data = match.get('players', [])
     relevant_player = __extract_relevant_player__(players_data, puuid)
     team_id = relevant_player['teamId']
     players_team = next(
-        filter(lambda x: x['teamId'] == team_id), match['teams'])
-    return {"won": int(players_team['won'] == True), "games_played": 1}
+        filter(lambda x: x['teamId'] == team_id, match['teams']))
+    match_id = match.get("matchInfo", {}).get("matchId")
+    is_completed = match.get("matchInfo", {}).get("isCompleted")
+    rounds_played = len(match.get("roundResults", []))
+    return {
+        "won": int(players_team['won'] == True),
+        "games_played": 1,
+        "matchId": match_id,
+        "isCompleted": is_completed,
+        "roundsPlayed": rounds_played
+    }
 
 
 def get_match_results(match, puuid):
     match_overview_results = __analyze_player_score__(match, puuid)
     match_rounds_results = __analyze_player_aim__(match, puuid)
-    return {**match_overview_results, **match_rounds_results}
+    match_metadata = __analyze_match_metadata__(match, puuid)
+    return {
+        "data": {**match_overview_results, **match_rounds_results},
+        "currentMatchInfo": {**match_metadata}
+    }
