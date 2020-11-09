@@ -26,33 +26,27 @@ def extract_first_match(match_stringified):
 
 
 def process_message(body):
-    # TODO: Improve this and make this more functional
     start_time = time.time()
     parsed_body = json.loads(body.decode('utf8'))
     current_match_info = parsed_body.get("currentMatchInfo", {})
-
     riot = RiotHandler()
-
     (region, puuid) = itemgetter("region", "puuid")(parsed_body)
     (match_id, game_over, round_count, games_played, games_won) = itemgetter(
         "matchId", "isCompleted", "roundsPlayed", "gamesPlayed", "won")(current_match_info)
 
-    if match_id is not None and game_over is False:
-        first_match_id = current_match_info.get("matchId")
-    else:
-        first_match_id = extract_first_match(
-            riot.get_matches_list(region, puuid))
+    first_match_id = match_id if match_id is not None and game_over is False else extract_first_match(
+        riot.get_matches_list(region, puuid))
     match_data = riot.get_match_data(region, first_match_id)
     results = get_match_results(match_data, puuid)
-
     (current_match_id, current_round_count, is_current_match_over) = itemgetter(
         'matchId', 'roundsPlayed', 'isCompleted')(results['currentMatchInfo'])
 
     did_match_progress = current_match_id != match_id or current_round_count != round_count
     if did_match_progress is True:
         for key in results['data']:
-            if results['data'][key] is not None and parsed_body['data'][key] is not None:
-                results['data'][key] += parsed_body['data'][key]
+            value = parsed_body['data'][key]
+            results_value = results['data'][key]
+            results_value += value if value is not None else 0
         if is_current_match_over is True:
             results['currentMatchInfo']['gamesPlayed'] += games_played
             results['currentMatchInfo']['won'] += games_won

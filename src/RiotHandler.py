@@ -22,14 +22,14 @@ class RiotHandler:
     def get_puuid(self, game_name, tag_line):
         url = 'https://americas.api.riotgames.com/riot/account/v1/accounts/by-riot-id/{}/{}'.format(
             game_name, tag_line)
-        return (self.__make_request(url)).text
+        return self.__make_request(url)
 
     def get_matches_list(self, region, puuid):
         url = 'https://{}.api.riotgames.com/val/match/v1/matchlists/by-puuid/{}'.format(
             region, puuid)
-        return (self.__make_request(url)).text
+        return self.__make_request(url)
 
     def get_match_data(self, region, match_id):
         url = 'https://{}.api.riotgames.com/val/match/v1/matches/{}'.format(
             region, match_id)
-        return (self.__make_request(url)).text
+        return self.__make_request(url)

@@ -32,7 +32,6 @@ def create_new_session(puuid, region):
             "deaths": 0,
             "assists": 0,
             "playtimeMillis": 0,
-            "abilityCasts": None,
             "legshots": 0,
             "bodyshots": 0,
             "headshots": 0,
