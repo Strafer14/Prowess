@@ -50,7 +50,7 @@ def __analyze_match_metadata__(match, puuid):
     rounds_played = len(match.get("roundResults", []))
     return {
         "won": int(players_team['won'] == True),
-        "games_played": 1,
+        "gamesPlayed": 1,
         "matchId": match_id,
         "isCompleted": is_completed,
         "roundsPlayed": rounds_played
