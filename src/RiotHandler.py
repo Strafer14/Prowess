@@ -1,6 +1,6 @@
 import requests
 from os import environ
-from ratelimit import limits
+from ratelimit import limits, sleep_and_retry
 
 
 class RiotHandler:
@@ -11,6 +11,7 @@ class RiotHandler:
                 "The VALORANT_API_KEY environment variable is missing")
         self.token = token
 
+    @sleep_and_retry
     @limits(calls=100, period=60)
     def __make_request(self, url):
         response = requests.get(url, headers={'X-Riot-Token': self.token})
