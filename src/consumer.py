@@ -1,11 +1,16 @@
+from match_analyzer import get_match_results
+from RiotHandler import RiotHandler
+
 import pika
 import os
 import redis
 import json
 import threading
 import time
-from RiotHandler import RiotHandler
-from match_analyzer import get_match_results
+from operator import itemgetter
+from dotenv import load_dotenv
+load_dotenv()
+
 
 RABBIT_HOST = os.environ.get("RABBIT_HOST")
 RABBIT_USER = os.environ.get("RABBIT_USER")
@@ -16,30 +21,32 @@ parameters = pika.ConnectionParameters(
     credentials=credentials, host=RABBIT_HOST, virtual_host=RABBIT_USER)
 
 
+def extract_first_match(match_stringified):
+    return matches['history'][0]['matchId']
+
+
 def process_message(body):
+    # TODO: Improve this and make this more functional
     start_time = time.time()
     parsed_body = json.loads(body.decode('utf8'))
     current_match_info = parsed_body.get("currentMatchInfo", {})
+
     riot = RiotHandler()
 
-    match_id = current_match_info.get("matchId")
-    game_over = current_match_info.get("isCompleted")
-    round_count = current_match_info.get("roundsPlayed")
-    games_played = current_match_info.get('gamesPlayed')
-    games_won = current_match_info.get('won')
+    (region, puuid) = itemgetter("region", "puuid")(parsed_body)
+    (match_id, game_over, round_count, games_played, games_won) = itemgetter(
+        "matchId", "isCompleted", "roundsPlayed", "gamesPlayed", "won")(current_match_info)
+
     if match_id is not None and game_over is False:
         first_match_id = current_match_info.get("matchId")
     else:
-        matches = json.loads(riot.get_matches_list(
-            parsed_body.get('region'), parsed_body.get('puuid')))
-        first_match_id = matches['history'][0]['matchId']
-    match_data = json.loads(riot.get_match_data(
-        parsed_body.get('region'), first_match_id))
-    results = get_match_results(match_data, parsed_body['puuid'])
+        first_match_id = extract_first_match(
+            riot.get_matches_list(region, puuid))
+    match_data = riot.get_match_data(region, first_match_id)
+    results = get_match_results(match_data, puuid)
 
-    current_match_id = results['currentMatchInfo']['matchId']
-    current_round_count = results['currentMatchInfo']['roundsPlayed']
-    is_current_match_over = results['currentMatchInfo']['isCompleted']
+    (current_match_id, current_round_count, is_current_match_over) = itemgetter(
+        'matchId', 'roundsPlayed', 'isCompleted')(results['currentMatchInfo'])
 
     did_match_progress = current_match_id != match_id or current_round_count != round_count
     if did_match_progress is True:

@@ -12,24 +12,24 @@ class RiotHandler:
         self.token = token
 
     @sleep_and_retry
-    @limits(calls=100, period=60)
+    @limits(calls=10, period=60)
     def __make_request(self, url):
         response = requests.get(url, headers={'X-Riot-Token': self.token})
         if response.status_code != 200:
             raise Exception('API response - {}: {}'.format(response.status_code, response.text))
-        return response
+        return json.loads(response.text)
 
     def get_puuid(self, game_name, tag_line):
         url = 'https://americas.api.riotgames.com/riot/account/v1/accounts/by-riot-id/{}/{}'.format(
             game_name, tag_line)
-        return (self.make_request(url)).text
+        return (self.__make_request(url)).text
 
     def get_matches_list(self, region, puuid):
         url = 'https://{}.api.riotgames.com/val/match/v1/matchlists/by-puuid/{}'.format(
             region, puuid)
-        return (self.make_request(url)).text
+        return (self.__make_request(url)).text
 
     def get_match_data(self, region, match_id):
         url = 'https://{}.api.riotgames.com/val/match/v1/matches/{}'.format(
             region, match_id)
-        return (self.make_request(url)).text
+        return (self.__make_request(url)).text
