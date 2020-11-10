@@ -21,7 +21,7 @@ parameters = pika.ConnectionParameters(
     credentials=credentials, host=RABBIT_HOST, virtual_host=RABBIT_USER)
 
 
-def extract_first_match(match_stringified):
+def extract_first_match(matches):
     return matches['history'][0]['matchId']
 
 
