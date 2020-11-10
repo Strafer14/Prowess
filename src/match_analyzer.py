@@ -11,8 +11,9 @@ def __extract_relevant_player(players_data, puuid):
 def __analyze_player_score(match, puuid):
     players_data = match.get('players', [])
     # Removing abilityCasts key as it is always null
-    relevant_player = {key: relevant_player[key] for key in __extract_relevant_player(
-        players_data, puuid) if key != 'abilityCasts'}
+    extracted_player = __extract_relevant_player(players_data, puuid)
+    relevant_player = {key: extracted_player[key]
+                       for key in extracted_player if key != 'abilityCasts'}
     return relevant_player.get('stats', {
         "score": 0,
         "roundsPlayed": 0,
@@ -43,14 +44,14 @@ def __analyze_player_aim(match, puuid):
 def __analyze_match_metadata(match, puuid):
     players_data = match.get('players', [])
     relevant_player = __extract_relevant_player(players_data, puuid)
-    team_id = relevant_player['teamId']
-    players_team = next(
-        filter(lambda x: x['teamId'] == team_id, match['teams']))
+    team_id = relevant_player.get('teamId')
+    players_team = [x for x in match.get(
+        'teams', []) if x['teamId'] == team_id]
     match_id = match.get("matchInfo", {}).get("matchId")
     is_completed = match.get("matchInfo", {}).get("isCompleted")
     rounds_played = len(match.get("roundResults", []))
     return {
-        "won": int(players_team['won'] == True),
+        "won": int((players_team[0] if len(players_team) > 0 else {}).get('won') == True),
         "gamesPlayed": 1,
         "matchId": match_id,
         "isCompleted": is_completed,
