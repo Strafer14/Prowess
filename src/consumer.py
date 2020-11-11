@@ -31,8 +31,11 @@ def process_message(body):
     current_match_info = parsed_body.get("currentMatchInfo", {})
     riot = RiotHandler()
     (region, puuid) = itemgetter("region", "puuid")(parsed_body)
-    (match_id, game_over, round_count, games_played, games_won) = itemgetter(
-        "matchId", "isCompleted", "roundsPlayed", "gamesPlayed", "won")(current_match_info)
+    try:
+        (match_id, game_over, round_count, games_played, games_won) = itemgetter(
+            "matchId", "isCompleted", "roundsPlayed", "gamesPlayed", "won")(current_match_info)
+    except:
+        (match_id, game_over, round_count, games_played, games_won) = (None, False, 0, 0, 0)
 
     first_match_id = match_id if match_id is not None and game_over is False else extract_first_match(
         riot.get_matches_list(region, puuid))
@@ -42,6 +45,8 @@ def process_message(body):
         'matchId', 'roundsPlayed', 'isCompleted')(results['currentMatchInfo'])
 
     did_match_progress = current_match_id != match_id or current_round_count != round_count
+    results['data'] = {key: results['data'][key]
+                       for key in results['data'] if key != 'abilityCasts'}
     if did_match_progress is True:
         for key in results['data']:
             value = parsed_body['data'][key]

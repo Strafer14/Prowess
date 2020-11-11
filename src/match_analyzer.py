@@ -10,11 +10,12 @@ def __extract_relevant_player(players_data, puuid):
 
 def __analyze_player_score(match, puuid):
     players_data = match.get('players', [])
-    # Removing abilityCasts key as it is always null
     extracted_player = __extract_relevant_player(players_data, puuid)
-    relevant_player = {key: extracted_player[key]
-                       for key in extracted_player if key != 'abilityCasts'}
-    return relevant_player.get('stats', {
+    # Removing abilityCasts key as it is always null
+    if extracted_player.get('stats') is not None:
+        extracted_player['stats'] = {key: extracted_player['stats'][key]
+                                     for key in extracted_player['stats'] if key != 'abilityCasts'}
+    return extracted_player.get('stats', {
         "score": 0,
         "roundsPlayed": 0,
         "kills": 0,

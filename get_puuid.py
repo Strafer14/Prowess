@@ -11,16 +11,15 @@ def main(event, context):
     r = redis.Redis(host=environ.get('REDIS_URL'), db=0)
     redis_puuid = r.get('{}#{}'.format(game_name, tag_line))
     if redis_puuid is not None:
-        player_puuid = json.dumps({"puuid": redis_puuid.decode(
-            'utf8')})
+        player_puuid = {"puuid": redis_puuid.decode('utf8')}
     else:
         riot_handler = RiotHandler()
         player_puuid = riot_handler.get_puuid(game_name, tag_line)
         r.set('{}#{}'.format(game_name, tag_line),
-              json.loads(player_puuid).get('puuid', 'Unknown'))
+              player_puuid.get('puuid', 'Unknown'))
     return {
         "statusCode": 200,
-        "body": player_puuid
+        "body": json.dumps(player_puuid)
     }
 
 
