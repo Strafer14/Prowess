@@ -18,7 +18,7 @@ class RiotHandler:
         response = requests.get(url, headers={'X-Riot-Token': self.token})
         if response.status_code != 200:
             raise Exception('API response - {}: {}'.format(response.status_code, response.text))
-        return json.loads(response.text)
+        return response.json()
 
     def get_puuid(self, game_name, tag_line):
         url = 'https://americas.api.riotgames.com/riot/account/v1/accounts/by-riot-id/{}/{}'.format(

@@ -7,6 +7,7 @@ import redis
 import json
 import threading
 import time
+import logging
 from operator import itemgetter
 from dotenv import load_dotenv
 load_dotenv()
@@ -22,21 +23,22 @@ parameters = pika.ConnectionParameters(
 
 
 def extract_first_match(matches):
-    return matches['history'][0]['matchId']
+    return matches.get('history', [{}])[0].get('matchId')
 
 
-def process_message(body):
-    start_time = time.time()
-    parsed_body = json.loads(body.decode('utf8'))
+def distil_data(parsed_body):
+    logging.debug("Parsing body received from consumer: " +
+                  json.dumps(parsed_body))
     current_match_info = parsed_body.get("currentMatchInfo", {})
-    riot = RiotHandler()
     (region, puuid) = itemgetter("region", "puuid")(parsed_body)
     try:
         (match_id, game_over, round_count, games_played, games_won) = itemgetter(
             "matchId", "isCompleted", "roundsPlayed", "gamesPlayed", "won")(current_match_info)
     except:
-        (match_id, game_over, round_count, games_played, games_won) = (None, False, 0, 0, 0)
+        (match_id, game_over, round_count, games_played,
+         games_won) = (None, False, 0, 0, 0)
 
+    riot = RiotHandler()
     first_match_id = match_id if match_id is not None and game_over is False else extract_first_match(
         riot.get_matches_list(region, puuid))
     match_data = riot.get_match_data(region, first_match_id)
@@ -55,12 +57,24 @@ def process_message(body):
         if is_current_match_over is True:
             results['currentMatchInfo']['gamesPlayed'] += games_played
             results['currentMatchInfo']['won'] += games_won
+    return {**parsed_body, **results}
 
+
+def update_session_in_db(data):
     r = redis.Redis(host=os.environ.get('REDIS_URL'), db=0)
-    r.set(parsed_body['sessionId'], json.dumps({**parsed_body, **results}))
+    r.set(parsed_body['sessionId'], json.dumps(data))
 
-    print("Successfully consumed one, took: " +
-          str(round(time.time() - start_time, 2)) + " seconds")
+
+def process_message(body):
+    start_time = time.time()
+    try:
+        parsed_body = json.loads(body.decode('utf8'))
+        update_session_in_db(distil_data(parsed_body))
+        logging.info("Successfully processed consumed message, took: " +
+                     str(round(time.time() - start_time, 2)) + " seconds")
+    except RuntimeError as e:
+        logging.error(
+            "An error occured when parsing consumed message {}: {}".format(body, e))
 
 
 def on_message(channel, method_frame, header_frame, body):
