@@ -81,6 +81,8 @@ target/
 # Jupyter Notebook
 .ipynb_checkpoints
 
+.terraform/
+
 # IPython
 profile_default/
 ipython_config.py

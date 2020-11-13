@@ -62,7 +62,7 @@ def distil_data(parsed_body):
 
 def update_session_in_db(data):
     r = redis.Redis(host=os.environ.get('REDIS_URL'), db=0)
-    r.set(parsed_body['sessionId'], json.dumps(data))
+    r.set(data['sessionId'], json.dumps(data))
 
 
 def process_message(body):
