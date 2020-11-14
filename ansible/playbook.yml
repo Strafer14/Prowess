@@ -1,0 +1,7 @@
+---
+- name: Provision valorant server
+  hosts: all
+  tasks:
+    - name: pull an image
+      docker_image:
+        name: strafer14/prowess
