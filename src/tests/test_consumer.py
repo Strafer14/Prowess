@@ -98,10 +98,10 @@ class TestConsumer(unittest.TestCase):
             }
         })
 
-    def test_empty_payload_processed_correctly(self):
+    def test_empty_payload_processed_correctly(self, mock_get):
         self.assertRaises(KeyError, distil_data, {})
 
-    def test_wrong_puuid_handled_correctly(self):
+    def test_wrong_puuid_handled_correctly(self, mock_get):
         result = distil_data({
             "sessionId": "e7710fc8-34d2-4cea-987b-2107c4e135d0",
             "currentMatchInfo": {
@@ -149,7 +149,7 @@ class TestConsumer(unittest.TestCase):
             }
         })
 
-    def test_round_number_same_match_num_different(self):
+    def test_round_number_same_match_num_different(self, mock_get):
         result = distil_data({
             "sessionId": "e7710fc8-34d2-4cea-987b-2107c4e135d0",
             "currentMatchInfo": {
