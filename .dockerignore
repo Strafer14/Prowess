@@ -1,0 +1,4 @@
+src/.env
+src/__pycache__
+src/tests
+src/static
