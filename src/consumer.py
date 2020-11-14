@@ -12,15 +12,9 @@ from operator import itemgetter
 from dotenv import load_dotenv
 load_dotenv()
 
-
 RABBIT_HOST = os.environ.get("RABBIT_HOST")
 RABBIT_USER = os.environ.get("RABBIT_USER")
 RABBIT_PWD = os.environ.get("RABBIT_PWD")
-
-credentials = pika.PlainCredentials(RABBIT_USER, RABBIT_PWD)
-parameters = pika.ConnectionParameters(
-    credentials=credentials, host=RABBIT_HOST, virtual_host=RABBIT_USER)
-
 
 def extract_first_match(matches):
     return matches.get('history', [{}])[0].get('matchId')
@@ -84,6 +78,9 @@ def on_message(channel, method_frame, header_frame, body):
 
 
 def main():
+    credentials = pika.PlainCredentials(RABBIT_USER, RABBIT_PWD)
+    parameters = pika.ConnectionParameters(
+        credentials=credentials, host=RABBIT_HOST, virtual_host=RABBIT_USER)
     connection = pika.BlockingConnection(parameters)
     channel = connection.channel()
     channel.basic_consume('lambda-riot-api-requests', on_message)
