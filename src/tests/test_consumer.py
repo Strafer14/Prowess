@@ -45,12 +45,7 @@ def mocked_requests_get(*args, **kwargs):
 
 class TestConsumer(unittest.TestCase):
     @mock.patch('src.RiotHandler.requests.get', side_effect=mocked_requests_get)
-    # TODO: check the match is different logic
-    # when just match id diff and round number same
-    # when match id same and round number diff
-    # when both are same
-    # when one is different and also game over
-    def test_normal_payload_processed_correctly(self, mock_get):
+    def test_normal_payload_processed_correctly(self):
         result = distil_data({
             "sessionId": "e7710fc8-34d2-4cea-987b-2107c4e135d0",
             "currentMatchInfo": {
@@ -98,10 +93,12 @@ class TestConsumer(unittest.TestCase):
             }
         })
 
-    def test_empty_payload_processed_correctly(self, mock_get):
+    @mock.patch('src.RiotHandler.requests.get', side_effect=mocked_requests_get)
+    def test_empty_payload_processed_correctly(self):
         self.assertRaises(KeyError, distil_data, {})
 
-    def test_wrong_puuid_handled_correctly(self, mock_get):
+    @mock.patch('src.RiotHandler.requests.get', side_effect=mocked_requests_get)
+    def test_wrong_puuid_handled_correctly(self):
         result = distil_data({
             "sessionId": "e7710fc8-34d2-4cea-987b-2107c4e135d0",
             "currentMatchInfo": {
@@ -149,7 +146,8 @@ class TestConsumer(unittest.TestCase):
             }
         })
 
-    def test_round_number_same_match_num_different(self, mock_get):
+    @mock.patch('src.RiotHandler.requests.get', side_effect=mocked_requests_get)
+    def test_round_number_same_match_num_different(self):
         result = distil_data({
             "sessionId": "e7710fc8-34d2-4cea-987b-2107c4e135d0",
             "currentMatchInfo": {
