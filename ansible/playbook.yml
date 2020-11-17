@@ -1,7 +1,165 @@
 ---
 - name: Provision valorant server
   hosts: all
+  become: True
+  remote_user: root
+  vars:
+      redis_password: "{{ lookup('env', 'DASH_LANE')}}"
+      redis_user: root
+      redis_group: root
+      ipv4_addr: 127.0.0.1
+      redis_bind_addr: 0.0.0.0
+      redis_port: 1338
+      redis_logfile: /var/log/redis/redis-server.log
   tasks:
+    - name: Install aptitude using apt
+      become: yes
+      apt: 
+        name: aptitude 
+        state: latest 
+        update_cache: yes 
+        force_apt_get: yes
+    - name: Install required system packages
+      become: yes
+      apt: 
+        name: '{{ item }}'
+        state: latest 
+        update_cache: yes
+      loop: [ 'apt-transport-https', 'ca-certificates', 'curl', 'software-properties-common', 'python3-pip', 'virtualenv', 'python3-setuptools', 'build-essential', 'tcl']
+    - name: Add Docker GPG apt Key
+      become: yes
+      apt_key:
+       url: https://download.docker.com/linux/ubuntu/gpg
+       state: present
+    - name: Add Docker Repository
+      become: yes
+      apt_repository:
+       repo: deb https://download.docker.com/linux/ubuntu bionic stable
+       state: present
+    - name: Update apt and install docker-ce
+      become: yes
+      apt: 
+        update_cache: yes
+        name: docker-ce 
+        state: latest
+
+    - name: Install docker python package
+      become: yes
+      pip:
+        name: '{{ item }}'
+      loop: ['docker', 'redis']
+
     - name: pull an image
+      become: yes
       docker_image:
         name: strafer14/prowess
+        source: pull
+
+    - name: download redis src
+      become: yes
+      unarchive: 
+        src: https://download.redis.io/releases/redis-6.0.9.tar.gz
+        copy: no
+        dest: /tmp
+        mode: u=rwx,g=rx,o=rx
+        owner: '{{ redis_user }}'
+    
+    - name: make redis
+      become: yes
+      make: 
+        chdir: /tmp/redis-6.0.9/
+
+    - name: test and install redis
+      make: 
+        chdir: /tmp/redis-6.0.9
+        target: '{{ item }}'
+      become: yes
+      with_items:
+        # - test
+        - install
+
+    - name: create /etc/redis, data, logs, and socket directories
+      become: yes
+      file: 
+        path: '{{ item }}'
+        state: directory
+      with_items:
+        - /etc/redis
+        - /var/lib/redis
+        - /var/log/redis
+        - /var/run/redis
+
+    - name: copy default redis.conf
+      # create a copy of the default redis.conf
+      copy: 
+        remote_src: True
+        src: /tmp/redis-6.0.9/redis.conf
+        dest: /etc/redis/redis.conf
+      become: yes
+    
+    - name: configure systemmd
+      become: yes
+      lineinfile: 
+        dest: /etc/redis/redis.conf 
+        regexp: '^supervised no$' 
+        line: 'supervised systemd'
+        state: present
+
+    - name: store redis data in /var/lib/redis
+      become: yes
+      lineinfile: 
+        dest: /etc/redis/redis.conf
+        regexp: '^dir ./$'
+        line: 'dir /var/lib/redis'
+        state: present
+
+    - name: secure redis
+      become: yes
+      lineinfile: 
+        dest: /etc/redis/redis.conf
+        regexp: '^# requirepass \w*$'
+        line: 'requirepass {{ redis_password }}'
+        state: present
+
+    - name: bind to redis.bind_addr
+      become: yes
+      lineinfile: 
+        dest: /etc/redis/redis.conf
+        regexp: '^bind {{ ipv4_addr }}$'
+        line: 'bind {{ redis_bind_addr }}'
+        state: present
+        
+    - name: change port
+      become: yes
+      lineinfile: 
+        dest: /etc/redis/redis.conf
+        regexp: '^port 6379$'
+        line: 'port {{ redis_port }}'
+        state: present
+
+    - name: configure logging
+      become: yes
+      lineinfile: 
+        dest: /etc/redis/redis.conf
+        regexp: '^logfile ""$'
+        line: 'logfile {{ redis_logfile }}'
+        state: present
+
+    - name: create redis-as-a-service
+      become: yes
+      template: 
+        src: templates/redis.service.j2 
+        dest: /etc/systemd/system/redis.service
+        owner: '{{ redis_user }}'
+        group: '{{ redis_group }}'
+        mode: 0644
+    
+    - name: start redis
+      become: yes
+      shell: nohup systemctl start redis &
+    
+    - name: Start a container and use an env file
+      community.general.docker_container:
+        name: prowess-agent
+        image: strafer14/prowess
+        env_file: ../src/.prod.env
