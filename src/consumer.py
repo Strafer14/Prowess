@@ -1,6 +1,7 @@
 from match_analyzer import get_match_results
 from RiotHandler import RiotHandler
 
+import daemon
 import pika
 import os
 import redis
@@ -15,6 +16,7 @@ load_dotenv()
 RABBIT_HOST = os.environ.get("RABBIT_HOST")
 RABBIT_USER = os.environ.get("RABBIT_USER")
 RABBIT_PWD = os.environ.get("RABBIT_PWD")
+
 
 def extract_first_match(matches):
     return matches.get('history', [{}])[0].get('matchId')
@@ -55,7 +57,8 @@ def distil_data(parsed_body):
 
 
 def update_session_in_db(data):
-    r = redis.Redis(host=os.environ.get('REDIS_URL'), db=0)
+    r = redis.Redis(host=localhost, port=os.environ.get(
+        "REDIS_PORT"), password=os.environ.get("REDIS_PWD"), db=0)
     r.set(data['sessionId'], json.dumps(data))
 
 
@@ -92,4 +95,5 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    with daemon.DaemonContext():
+        main()
