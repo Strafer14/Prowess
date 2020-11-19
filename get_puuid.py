@@ -29,8 +29,8 @@ def main(event, context):
     except RuntimeError as e:
         logger.error(e)
         return {
-            "statusCode": 400,
-            "body": json.dumps({"error": "session id does not exist"})
+            "statusCode": 500,
+            "body": json.dumps({"error": "some error occurred"})
         }
 
 
