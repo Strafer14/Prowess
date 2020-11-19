@@ -158,8 +158,19 @@
       become: yes
       shell: nohup systemctl start redis &
     
+    - name: Copy env file
+      become: yes
+      copy:
+        src: ../src/.prod.env
+        dest: /var/.env
+        owner: root
+        group: root
+        mode: u=rw,g=r,o=r
+    
     - name: Start a container and use an env file
+      become: yes
       community.general.docker_container:
         name: prowess-agent
         image: strafer14/prowess
-        env_file: ../src/.prod.env
+        env_file: /var/.env
+        container_default_behavior: compatibility
