@@ -3,3 +3,4 @@ src/.prod.env
 src/__pycache__
 src/tests
 src/static
+src/publisher.py
