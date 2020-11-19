@@ -86,6 +86,7 @@ functions:
 plugins:
   - serverless-python-requirements
   - serverless-offline
+  - serverless-dotenv-plugin
 
 custom:
   pythonRequirements:
