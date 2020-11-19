@@ -29,3 +29,4 @@ jobs:
       run: nose2 -v
       env:
         VALORANT_API_KEY: ''
+        PYTHON_ENV: testing

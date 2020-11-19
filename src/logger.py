@@ -11,7 +11,7 @@ logger.setLevel(logging.DEBUG)
 # Create formatter
 FORMAT = logging.Formatter(
 "%(asctime)s - %(name)s - %(levelname)s - %(message)s")
-if environ.get("PYTHON_ENV") != "development":
+if environ.get("PYTHON_ENV") != "development" and environ.get("PYTHON_ENV") != "testing":
     discord_handler = DiscordHandler(webhook_url, agent)
     stream_handler = logging.StreamHandler()
     discord_handler.setLevel(logging.INFO)
