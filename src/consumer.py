@@ -1,7 +1,6 @@
 from match_analyzer import get_match_results
 from RiotHandler import RiotHandler
 
-import daemon
 import pika
 import os
 import redis
@@ -81,6 +80,7 @@ def on_message(channel, method_frame, header_frame, body):
 
 
 def main():
+    logging.info("Starting service")
     credentials = pika.PlainCredentials(RABBIT_USER, RABBIT_PWD)
     parameters = pika.ConnectionParameters(
         credentials=credentials, host=RABBIT_HOST, virtual_host=RABBIT_USER)
@@ -95,5 +95,4 @@ def main():
 
 
 if __name__ == '__main__':
-    with daemon.DaemonContext():
-        main()
+    main()
