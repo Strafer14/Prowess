@@ -1,5 +1,6 @@
 import json
 import redis
+import requests
 from os import environ
 
 from src.logger import logger

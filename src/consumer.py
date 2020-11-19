@@ -70,7 +70,7 @@ def distil_data(parsed_body):
 
 
 def update_session_in_db(data):
-    r = redis.Redis(host=localhost, port=os.environ.get(
+    r = redis.Redis(host="localhost", port=os.environ.get(
         "REDIS_PORT"), password=os.environ.get("REDIS_PWD"), db=0)
     r.set(data['sessionId'], json.dumps(data))
 

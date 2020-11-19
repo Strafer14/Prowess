@@ -1,7 +1,7 @@
 import pika
 import os
 import asyncio
-from logger import logger
+from .logger import logger
 
 RABBIT_HOST = os.environ.get("RABBIT_HOST", "fox.rmq.cloudamqp.com")
 RABBIT_USER = os.environ.get("RABBIT_USER", "ortmbosi")
