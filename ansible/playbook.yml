@@ -174,3 +174,4 @@
         image: strafer14/prowess
         env_file: /var/.env
         container_default_behavior: compatibility
+        restart_policy: always
