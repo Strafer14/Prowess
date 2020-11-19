@@ -1,5 +1,5 @@
-src/.env
-src/.prod.env
+src/.env.development
+src/.env.production
 src/__pycache__
 src/tests
 src/static

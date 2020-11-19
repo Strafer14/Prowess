@@ -161,7 +161,7 @@
     - name: Copy env file
       become: yes
       copy:
-        src: ../src/.prod.env
+        src: ../src/.env.production
         dest: /var/.env
         owner: root
         group: root

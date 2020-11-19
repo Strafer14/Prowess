@@ -110,7 +110,7 @@ celerybeat.pid
 node_modules
 
 # Environments
-*.env
+.env.*
 .venv
 env/
 venv/
