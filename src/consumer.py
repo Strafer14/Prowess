@@ -80,7 +80,7 @@ def process_message(body):
     try:
         parsed_body = json.loads(body.decode('utf8'))
         update_session_in_db(distil_data(parsed_body))
-        logger.debug("Successfully processed consumed message, took: " +
+        logger.info("Successfully processed consumed message, took: " +
                      str(round(time.time() - start_time, 2)) + " seconds")
     except RuntimeError as e:
         logger.error(

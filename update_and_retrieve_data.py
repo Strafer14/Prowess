@@ -4,7 +4,9 @@ import redis
 import asyncio
 from os import environ
 from threading import Thread
+
 from src.publisher import publish
+from src.logger import logger
 
 actions = {
     "session_created": 100,
@@ -75,6 +77,7 @@ def main(event, context):
             "body": json.dumps({**session_data, "action": actions["data_updated"]})
         }
     except RuntimeError as e:
+        logger.error(e)
         return {
             "statusCode": 400,
             "body": json.dumps({"error": "session id does not exist"})
