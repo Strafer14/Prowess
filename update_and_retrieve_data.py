@@ -12,13 +12,18 @@ actions = {
 }
 
 loop = asyncio.get_event_loop()
+
+
 def f(loop):
     asyncio.set_event_loop(loop)
     loop.run_forever()
-t = Thread(target=f, args=(loop,))
-t.start()  
 
-def create_new_session(puuid, region):
+
+t = Thread(target=f, args=(loop,))
+t.start()
+
+
+def create_new_session(puuid, region, redis):
     session_id = str(uuid.uuid4())
     default_full_session_dict = {
         "sessionId": session_id,
@@ -39,10 +44,11 @@ def create_new_session(puuid, region):
             "games_played": 0,
         },
     }
-    async def set_default_dict():
-        r = redis.Redis(host=environ.get('REDIS_URL'), db=0)
-        r.set(session_id, json.dumps(default_full_session_dict))
-    asyncio.run_coroutine_threadsafe(set_default_dict(), loop)
+
+    async def set_default_dict(redis):
+        redis.set(session_id, json.dumps(default_full_session_dict))
+
+    asyncio.run_coroutine_threadsafe(set_default_dict(redis), loop)
     return {
         "statusCode": 200,
         "body": json.dumps({
@@ -56,18 +62,19 @@ def main(event, context):
     session_id = event.get('queryStringParameters').get('session_id')
     puuid = event.get('pathParameters', {}).get('puuid')
     region = event.get('queryStringParameters').get('region')
+    r = redis.Redis(host=environ.get("REDIS_URL"), port=environ.get(
+        "REDIS_PORT"), password=environ.get("REDIS_PWD"), db=0)
     if session_id is None:
-        return create_new_session(puuid, region)
+        return create_new_session(puuid, region, r)
     try:
-        r = redis.Redis(host=environ.get('REDIS_URL'), db=0)
         session_data = json.loads(r.get(session_id).decode('utf8'))
-        asyncio.run_coroutine_threadsafe(publish(json.dumps(session_data)), loop)
+        asyncio.run_coroutine_threadsafe(
+            publish(json.dumps(session_data)), loop)
         return {
             "statusCode": 200,
             "body": json.dumps({**session_data, "action": actions["data_updated"]})
         }
     except RuntimeError as e:
-        print(e)
         return {
             "statusCode": 400,
             "body": json.dumps({"error": "session id does not exist"})

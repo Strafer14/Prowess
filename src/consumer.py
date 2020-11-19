@@ -7,14 +7,28 @@ import redis
 import json
 import threading
 import time
-import logging
+import asyncio
 from operator import itemgetter
 from dotenv import load_dotenv
+from threading import Thread
+from consumer_api import api
+from logger import logger
 load_dotenv()
 
 RABBIT_HOST = os.environ.get("RABBIT_HOST")
 RABBIT_USER = os.environ.get("RABBIT_USER")
 RABBIT_PWD = os.environ.get("RABBIT_PWD")
+
+loop = asyncio.get_event_loop()
+
+
+def f(loop):
+    asyncio.set_event_loop(loop)
+    loop.run_forever()
+
+
+t = Thread(target=f, args=(loop,))
+t.start()
 
 
 def extract_first_match(matches):
@@ -22,7 +36,7 @@ def extract_first_match(matches):
 
 
 def distil_data(parsed_body):
-    logging.debug("Parsing body received from consumer: " +
+    logger.debug("Parsing body received from consumer: " +
                   json.dumps(parsed_body))
     current_match_info = parsed_body.get("currentMatchInfo", {})
     (region, puuid) = itemgetter("region", "puuid")(parsed_body)
@@ -66,10 +80,10 @@ def process_message(body):
     try:
         parsed_body = json.loads(body.decode('utf8'))
         update_session_in_db(distil_data(parsed_body))
-        logging.info("Successfully processed consumed message, took: " +
+        logger.debug("Successfully processed consumed message, took: " +
                      str(round(time.time() - start_time, 2)) + " seconds")
     except RuntimeError as e:
-        logging.error(
+        logger.error(
             "An error occured when parsing consumed message {}: {}".format(body, e))
 
 
@@ -80,7 +94,7 @@ def on_message(channel, method_frame, header_frame, body):
 
 
 def main():
-    logging.info("Starting service")
+    logger.info("Starting service")
     credentials = pika.PlainCredentials(RABBIT_USER, RABBIT_PWD)
     parameters = pika.ConnectionParameters(
         credentials=credentials, host=RABBIT_HOST, virtual_host=RABBIT_USER)
@@ -95,4 +109,5 @@ def main():
 
 
 if __name__ == '__main__':
+    asyncio.run_coroutine_threadsafe(api.run(), loop)
     main()
