@@ -46,8 +46,7 @@ def distil_data(parsed_body, riot):
 
 
 def update_session_in_db(data, redis):
-    print(data)
-    # redis.set(data['sessionId'], data)
+    redis.set(data['sessionId'], data)
 
 
 def process_message(body, redis, riot):
@@ -56,7 +55,7 @@ def process_message(body, redis, riot):
         parsed_body = body
         result = json.dumps(distil_data(parsed_body, riot))
         update_session_in_db(result, redis)
-        print("Successfully processed consumed message, took: " +
+        logger.info("Successfully processed consumed message, took: " +
               str(round(time.time() - start_time, 2)) + " seconds")
         return result
     except RuntimeError as e:

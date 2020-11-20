@@ -3,7 +3,7 @@ import json
 import os
 from unittest import mock
 from src.RiotHandler import RiotHandler
-from src.consumer import distil_data
+from src.api_service import distil_data
 
 puuid = 'EE8A-dek_wW2K9vwp7SrtdVq8GZ7glvOtKnLEL5gcO6HsOpQoFnlr2F7UMS4Nk7rO1cz-JkvaZ36YQ'
 
@@ -45,7 +45,7 @@ def mocked_requests_get(*args, **kwargs):
 
 class TestConsumer(unittest.TestCase):
     @mock.patch('src.RiotHandler.requests.get', side_effect=mocked_requests_get)
-    def test_normal_payload_processed_correctly(self):
+    def test_normal_payload_processed_correctly(self, mocked_requests_get):
         result = distil_data({
             "sessionId": "e7710fc8-34d2-4cea-987b-2107c4e135d0",
             "currentMatchInfo": {
@@ -68,7 +68,7 @@ class TestConsumer(unittest.TestCase):
                 "bodyshots": 0,
                 "headshots": 0
             }
-        })
+        }, RiotHandler())
         self.assertEqual(result, {
             'sessionId': 'e7710fc8-34d2-4cea-987b-2107c4e135d0',
             'currentMatchInfo': {
@@ -94,12 +94,12 @@ class TestConsumer(unittest.TestCase):
         })
 
     @mock.patch('src.RiotHandler.requests.get', side_effect=mocked_requests_get)
-    def test_empty_payload_processed_correctly(self):
-        self.assertRaises(KeyError, distil_data, {})
+    def test_empty_payload_processed_correctly(self, mocked_requests_get):
+        self.assertRaises(KeyError, distil_data, {}, RiotHandler())
 
     @mock.patch('src.RiotHandler.requests.get', side_effect=mocked_requests_get)
-    def test_wrong_puuid_handled_correctly(self):
-        result = distil_data({
+    def test_wrong_puuid_handled_correctly(self, mocked_requests_get):
+        payload = {
             "sessionId": "e7710fc8-34d2-4cea-987b-2107c4e135d0",
             "currentMatchInfo": {
                 "won": 2,
@@ -121,77 +121,5 @@ class TestConsumer(unittest.TestCase):
                 "bodyshots": 63,
                 "headshots": 10
             }
-        })
-        self.assertEqual(result, {
-            'sessionId': 'e7710fc8-34d2-4cea-987b-2107c4e135d0',
-            'currentMatchInfo': {
-                'won': 3,
-                'gamesPlayed': 3,
-                'matchId': '7afb8f25-54ae-4a8b-b03f-bb8e5cb9de46',
-                'isCompleted': True,
-                'roundsPlayed': 28
-            },
-            'puuid': 'mKFglzHwrBYFbj1j87AHrNsLNm1SQdpiEbNOLM-QG2Kb_Af2QJb-GKkVDQCg41tL8ACfQJpBbXVfxA',
-            'region': 'EU',
-            'data': {
-                'score': 5805,
-                'roundsPlayed': 28,
-                'kills': 21,
-                'deaths': 18,
-                'assists': 2,
-                'playtimeMillis': 2734996,
-                'legshots': 6,
-                'bodyshots': 56,
-                'headshots': 12
-            }
-        })
-
-    # @mock.patch('src.RiotHandler.requests.get', side_effect=mocked_requests_get)
-    # def test_round_number_same_match_num_different(self):
-    #     result = distil_data({
-    #         "sessionId": "e7710fc8-34d2-4cea-987b-2107c4e135d0",
-    #         "currentMatchInfo": {
-    #             "won": 2,
-    #             "gamesPlayed": 2,
-    #             "matchId": "a937f53e-5b17-478e-a83b-8342fe242e89",
-    #             "isCompleted": True,
-    #             "roundsPlayed": 7
-    #         },
-    #         "puuid": puuid,
-    #         "region": "EU",
-    #         "data": {
-    #             "score": 0,
-    #             "roundsPlayed": 0,
-    #             "kills": 0,
-    #             "deaths": 0,
-    #             "assists": 0,
-    #             "playtimeMillis": 0,
-    #             "legshots": 0,
-    #             "bodyshots": 0,
-    #             "headshots": 0
-    #         }
-    #     })
-    #     print(result)
-    #     # self.assertEqual(result, {
-    #     #     'sessionId': 'e7710fc8-34d2-4cea-987b-2107c4e135d0',
-    #     #     'currentMatchInfo': {
-    #     #         'won': 2,
-    #     #         'gamesPlayed': 3,
-    #     #         'matchId': '4ea732fd-1820-43a0-bddd-f88d912fb2ff',
-    #     #         'isCompleted': True,
-    #     #         'roundsPlayed': 7
-    #     #     },
-    #     #     'puuid': 'EE8A-dek_wW2K9vwp7SrtdVq8GZ7glvOtKnLEL5gcO6HsOpQoFnlr2F7UMS4Nk7rO1cz-JkvaZ36YQ',
-    #     #     'region': 'EU',
-    #     #     'data': {
-    #     #         'score': 410,
-    #     #         'roundsPlayed': 7,
-    #     #         'kills': 1,
-    #     #         'deaths': 6,
-    #     #         'assists': 3,
-    #     #              'playtimeMillis': 671396,
-    #     #              'legshots': 2,
-    #     #              'bodyshots': 6,
-    #     #              'headshots': 0
-    #     #     }
-    #     # })
+        }
+        self.assertRaises(AttributeError, distil_data, payload, RiotHandler())

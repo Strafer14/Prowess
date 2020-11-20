@@ -8,7 +8,7 @@ from ratelimit import limits, sleep_and_retry
 class RiotHandler:
     def __init__(self):
         token = environ.get('VALORANT_API_KEY')
-        if token is None:
+        if token is None and environ.get("PYTHON_ENV") != 'testing':
             raise Exception(
                 "The VALORANT_API_KEY environment variable is missing")
         self.token = token
