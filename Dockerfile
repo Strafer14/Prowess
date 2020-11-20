@@ -4,6 +4,6 @@ COPY requirements.txt requirements.txt
 COPY src src
 
 RUN ["pip","install","-r","requirements.txt"]
-RUN ["cd", "src"]
+WORKDIR /src
 EXPOSE 8000
 CMD ["gunicorn", "api:api"]

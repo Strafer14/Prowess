@@ -121,13 +121,13 @@
         line: 'requirepass {{ redis_password }}'
         state: present
 
-    - name: bind to redis.bind_addr
-      become: yes
-      lineinfile: 
-        dest: /etc/redis/redis.conf
-        regexp: '^bind {{ ipv4_addr }}$'
-        line: 'bind {{ redis_bind_addr }}'
-        state: present
+    # - name: bind to redis.bind_addr
+    #   become: yes
+    #   lineinfile: 
+    #     dest: /etc/redis/redis.conf
+    #     regexp: '^bind {{ ipv4_addr }}$'
+    #     line: 'bind {{ redis_bind_addr }}'
+    #     state: present
         
     - name: change port
       become: yes
