@@ -4,4 +4,6 @@ COPY requirements.txt requirements.txt
 COPY src src
 
 RUN ["pip","install","-r","requirements.txt"]
-CMD ["python", "src/consumer.py"]
+RUN ["cd", "src"]
+EXPOSE 8000
+CMD ["gunicorn", "api:api"]
