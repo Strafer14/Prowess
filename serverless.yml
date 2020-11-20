@@ -91,3 +91,7 @@ plugins:
 custom:
   pythonRequirements:
     dockerizePip: true
+  dotenv:
+    include:
+      - CONSUMER_API_URL
+      - DISCORD_WEBHOOK
