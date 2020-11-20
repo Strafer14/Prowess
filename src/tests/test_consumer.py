@@ -146,52 +146,52 @@ class TestConsumer(unittest.TestCase):
             }
         })
 
-    @mock.patch('src.RiotHandler.requests.get', side_effect=mocked_requests_get)
-    def test_round_number_same_match_num_different(self):
-        result = distil_data({
-            "sessionId": "e7710fc8-34d2-4cea-987b-2107c4e135d0",
-            "currentMatchInfo": {
-                "won": 2,
-                "gamesPlayed": 2,
-                "matchId": "a937f53e-5b17-478e-a83b-8342fe242e89",
-                "isCompleted": True,
-                "roundsPlayed": 7
-            },
-            "puuid": puuid,
-            "region": "EU",
-            "data": {
-                "score": 0,
-                "roundsPlayed": 0,
-                "kills": 0,
-                "deaths": 0,
-                "assists": 0,
-                "playtimeMillis": 0,
-                "legshots": 0,
-                "bodyshots": 0,
-                "headshots": 0
-            }
-        })
-        print(result)
-        # self.assertEqual(result, {
-        #     'sessionId': 'e7710fc8-34d2-4cea-987b-2107c4e135d0',
-        #     'currentMatchInfo': {
-        #         'won': 2,
-        #         'gamesPlayed': 3,
-        #         'matchId': '4ea732fd-1820-43a0-bddd-f88d912fb2ff',
-        #         'isCompleted': True,
-        #         'roundsPlayed': 7
-        #     },
-        #     'puuid': 'EE8A-dek_wW2K9vwp7SrtdVq8GZ7glvOtKnLEL5gcO6HsOpQoFnlr2F7UMS4Nk7rO1cz-JkvaZ36YQ',
-        #     'region': 'EU',
-        #     'data': {
-        #         'score': 410,
-        #         'roundsPlayed': 7,
-        #         'kills': 1,
-        #         'deaths': 6,
-        #         'assists': 3,
-        #              'playtimeMillis': 671396,
-        #              'legshots': 2,
-        #              'bodyshots': 6,
-        #              'headshots': 0
-        #     }
-        # })
+    # @mock.patch('src.RiotHandler.requests.get', side_effect=mocked_requests_get)
+    # def test_round_number_same_match_num_different(self):
+    #     result = distil_data({
+    #         "sessionId": "e7710fc8-34d2-4cea-987b-2107c4e135d0",
+    #         "currentMatchInfo": {
+    #             "won": 2,
+    #             "gamesPlayed": 2,
+    #             "matchId": "a937f53e-5b17-478e-a83b-8342fe242e89",
+    #             "isCompleted": True,
+    #             "roundsPlayed": 7
+    #         },
+    #         "puuid": puuid,
+    #         "region": "EU",
+    #         "data": {
+    #             "score": 0,
+    #             "roundsPlayed": 0,
+    #             "kills": 0,
+    #             "deaths": 0,
+    #             "assists": 0,
+    #             "playtimeMillis": 0,
+    #             "legshots": 0,
+    #             "bodyshots": 0,
+    #             "headshots": 0
+    #         }
+    #     })
+    #     print(result)
+    #     # self.assertEqual(result, {
+    #     #     'sessionId': 'e7710fc8-34d2-4cea-987b-2107c4e135d0',
+    #     #     'currentMatchInfo': {
+    #     #         'won': 2,
+    #     #         'gamesPlayed': 3,
+    #     #         'matchId': '4ea732fd-1820-43a0-bddd-f88d912fb2ff',
+    #     #         'isCompleted': True,
+    #     #         'roundsPlayed': 7
+    #     #     },
+    #     #     'puuid': 'EE8A-dek_wW2K9vwp7SrtdVq8GZ7glvOtKnLEL5gcO6HsOpQoFnlr2F7UMS4Nk7rO1cz-JkvaZ36YQ',
+    #     #     'region': 'EU',
+    #     #     'data': {
+    #     #         'score': 410,
+    #     #         'roundsPlayed': 7,
+    #     #         'kills': 1,
+    #     #         'deaths': 6,
+    #     #         'assists': 3,
+    #     #              'playtimeMillis': 671396,
+    #     #              'legshots': 2,
+    #     #              'bodyshots': 6,
+    #     #              'headshots': 0
+    #     #     }
+    #     # })
