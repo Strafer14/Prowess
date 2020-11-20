@@ -18,8 +18,6 @@ class RiotHandler:
     def __make_request(self, url):
         logger.debug("Making request to RIOT API")
         response = requests.get(url, headers={'X-Riot-Token': self.token})
-        if response.status_code != 200:
-            raise Exception('API response - {}: {}'.format(response.status_code, response.text))
         return response.json()
 
     def get_puuid(self, game_name, tag_line):
