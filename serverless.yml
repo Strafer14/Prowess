@@ -37,6 +37,7 @@ plugins:
   - serverless-python-requirements
   - serverless-offline
   - serverless-dotenv-plugin
+  - serverless-api-gateway-throttling
 
 custom:
   pythonRequirements:
@@ -45,3 +46,6 @@ custom:
     include:
       - CONSUMER_API_URL
       - DISCORD_WEBHOOK
+  apiGatewayThrottling:
+    maxRequestsPerSecond: 500
+    maxConcurrentRequests: 100
