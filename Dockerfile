@@ -6,4 +6,4 @@ COPY src src
 RUN ["pip","install","-r","requirements.txt"]
 WORKDIR /src
 EXPOSE 8000
-CMD ["gunicorn", "api:api"]
+CMD ["gunicorn","-b","0.0.0.0:8000","api:api"]
