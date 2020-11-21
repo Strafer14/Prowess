@@ -46,7 +46,7 @@ def distil_data(parsed_body, riot):
 
 
 def update_session_in_db(data, redis):
-    redis.set(data['sessionId'], data)
+    redis.set(json.loads(data)['sessionId'], data)
 
 
 def process_message(body, redis, riot):

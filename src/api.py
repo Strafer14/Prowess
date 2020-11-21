@@ -6,8 +6,11 @@ from flask import Flask, json, request, abort
 from RiotHandler import RiotHandler
 from logger import logger
 from api_service import process_message
-r = redis.Redis(host="localhost", port=environ.get(
-    "REDIS_PORT"), password=environ.get("REDIS_PWD"), db=0)
+if environ.get("PYTHON_ENV") != "development":
+    r = redis.Redis(host=environ.get("REDIS_HOST"), port=environ.get(
+        "REDIS_PORT"), password=environ.get("REDIS_PWD"), db=0)
+else:
+    r = redis.Redis()
 riot_handler = RiotHandler()
 api = Flask(__name__)
 
