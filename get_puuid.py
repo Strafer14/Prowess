@@ -11,8 +11,13 @@ def main(event, context):
     tag_line = path_params.get("tagLine")
     payload = {"game_name": game_name, "tag_line": tag_line}
     try:
-        player_puuid = requests.get(environ.get(
-            "CONSUMER_API_URL") + "/api/v1/prowess/puuid", params=payload).text
+        request_result = requests.get(environ.get(
+            "CONSUMER_API_URL") + "/api/v1/prowess/puuid", params=payload)
+        if request_result.status_code == requests.codes.not_found:
+            return {
+                "statusCode": 404
+            }
+        player_puuid = request_result.text
         return {
             "statusCode": 200,
             "body": player_puuid
