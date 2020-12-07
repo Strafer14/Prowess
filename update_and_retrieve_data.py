@@ -4,7 +4,6 @@ import asyncio
 from os import environ
 from threading import Thread
 
-from src.publisher import publish
 from src.logger import logger
 loop = asyncio.get_event_loop()
 
