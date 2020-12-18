@@ -27,12 +27,20 @@ def main(event, context):
             "CONSUMER_API_URL") + "/api/v1/prowess/session", params=payload).json()
         return {
             "statusCode": 200,
+            "headers": {
+                "Access-Control-Allow-Origin": "*",
+                "Access-Control-Allow-Credentials": True,
+            },
             "body": json.dumps({**session_data})
         }
     except RuntimeError as e:
         logger.error(e)
         return {
             "statusCode": 500,
+            "headers": {
+                "Access-Control-Allow-Origin": "*",
+                "Access-Control-Allow-Credentials": True,
+            },
             "body": json.dumps({"error": "An error has occurred"})
         }
 

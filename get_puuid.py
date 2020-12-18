@@ -15,17 +15,29 @@ def main(event, context):
             "CONSUMER_API_URL") + "/api/v1/prowess/puuid", params=payload)
         if request_result.status_code == requests.codes.not_found:
             return {
-                "statusCode": 404
+                "statusCode": 404,
+                "headers": {
+                    "Access-Control-Allow-Origin": "*",
+                    "Access-Control-Allow-Credentials": True,
+                }
             }
         player_puuid = request_result.text
         return {
             "statusCode": 200,
+            "headers": {
+                "Access-Control-Allow-Origin": "*",
+                "Access-Control-Allow-Credentials": True,
+            },
             "body": player_puuid
         }
     except RuntimeError as e:
         logger.error(e)
         return {
             "statusCode": 500,
+            "headers": {
+                "Access-Control-Allow-Origin": "*",
+                "Access-Control-Allow-Credentials": True,
+            },
             "body": json.dumps({"error": "An error has occurred"})
         }
 
