@@ -16,7 +16,7 @@ class RiotHandler:
     @sleep_and_retry
     @limits(calls=10, period=60)
     def __make_request(self, url):
-        logger.debug("Making request to RIOT API")
+        logger.debug("Making request to RIOT API: {}".format(url))
         response = requests.get(url, headers={'X-Riot-Token': self.token})
         return response.json()
 

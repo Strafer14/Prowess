@@ -5,20 +5,21 @@ from os import environ
 webhook_url = environ.get("DISCORD_WEBHOOK")
 agent = "Prowess"
 
-logger = logging.getLogger("Prowess")
+logger = logging.getLogger(agent)
 logger.setLevel(logging.DEBUG)
 
 # Create formatter
 FORMAT = logging.Formatter(
-"%(asctime)s - %(name)s - %(levelname)s - %(message)s")
-if environ.get("PYTHON_ENV") != "development" and environ.get("PYTHON_ENV") != "testing":
-    discord_handler = DiscordHandler(webhook_url, agent)
-    stream_handler = logging.StreamHandler()
-    discord_handler.setLevel(logging.INFO)
-    stream_handler.setLevel(logging.DEBUG)
-    discord_handler.setFormatter(FORMAT)
-    stream_handler.setFormatter(FORMAT)
-    logger.addHandler(discord_handler)
-    logger.addHandler(stream_handler)
+    "%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 
+if webhook_url is not None:
+    discord_handler = DiscordHandler(webhook_url, agent)
+    discord_handler.setLevel(logging.INFO)
+    discord_handler.setFormatter(FORMAT)
+    logger.addHandler(discord_handler)
+
+stream_handler = logging.StreamHandler()
+stream_handler.setLevel(logging.DEBUG)
+stream_handler.setFormatter(FORMAT)
+logger.addHandler(stream_handler)
 logger.debug("Logger created")

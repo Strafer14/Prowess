@@ -22,6 +22,7 @@ def main(event, context):
     puuid = event.get('pathParameters', {}).get('puuid')
     region = event.get('queryStringParameters').get('region')
     payload = {"region": region, "puuid": puuid, "session_id": session_id}
+    logger.debug(payload)
     try:
         session_data = requests.get(environ.get(
             "CONSUMER_API_URL") + "/api/v1/prowess/session", params=payload).json()

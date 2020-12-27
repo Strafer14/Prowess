@@ -36,6 +36,8 @@ def get_puuid():
 
 @api.route('/api/v1/prowess/session', methods=['GET'])
 def get_session():
+    logger.debug("Received get session request, {}".format(
+        json.dumps(request.args)))
     region = request.args.get("region")
     puuid = request.args.get("puuid")
     session_id = request.args.get("session_id")
