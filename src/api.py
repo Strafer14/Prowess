@@ -10,7 +10,8 @@ if environ.get("PYTHON_ENV") != "development":
     r = redis.Redis(host=environ.get("REDIS_HOST"), port=environ.get(
         "REDIS_PORT"), password=environ.get("REDIS_PWD"), db=0)
 else:
-    r = redis.Redis()
+    r = redis.Redis(host=environ.get("REDIS_HOST"), port=environ.get(
+        "REDIS_PORT"), db=0)
 riot_handler = RiotHandler()
 api = Flask(__name__)
 

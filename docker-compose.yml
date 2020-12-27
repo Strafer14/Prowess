@@ -1,0 +1,15 @@
+version: "3.8"
+
+services:
+  prowess-api:
+    container_name: prowess-api
+    image: strafer14/prowess
+    env_file:
+     - ./src/.env.development
+    ports:
+      - "8000:8000"
+  redis:
+    container_name: redis
+    image: redis
+    ports:
+      - "6379:6379"
