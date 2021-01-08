@@ -1,5 +1,6 @@
 from match_analyzer import get_match_results
 from RiotHandler import RiotHandler
+from sentry_sdk import capture_exception
 
 import os
 import json
@@ -13,7 +14,7 @@ def extract_first_match(matches):
 
 
 def distil_data(parsed_body, riot):
-    logger.debug("Parsing body received from consumer: " +
+    logger.debug("Parsing body received from api: " +
                  json.dumps(parsed_body))
     current_match_info = parsed_body.get("currentMatchInfo", {})
     (region, puuid) = itemgetter("region", "puuid")(parsed_body)
@@ -55,9 +56,8 @@ def process_message(body, redis, riot):
         parsed_body = body
         result = json.dumps(distil_data(parsed_body, riot))
         update_session_in_db(result, redis)
-        logger.info("Successfully processed consumed message, took: " +
-              str(round(time.time() - start_time, 2)) + " seconds")
         return result
-    except RuntimeError as e:
+    except Exception as e:
+        capture_exception(e)
         logger.error(
             "An error occured when parsing consumed message {}: {}".format(body, e))
