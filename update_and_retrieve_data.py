@@ -21,6 +21,14 @@ def main(event, context):
     session_id = event.get('queryStringParameters').get('session_id')
     puuid = event.get('pathParameters', {}).get('puuid')
     region = event.get('queryStringParameters').get('region')
+    if puuid is None or region is None:
+        return {
+            "statusCode": 400,
+            "headers": {
+                "Access-Control-Allow-Origin": "*",
+                "Access-Control-Allow-Credentials": True,
+            },
+        }
     payload = {"region": region, "puuid": puuid, "session_id": session_id}
     logger.debug(payload)
     try:
@@ -34,7 +42,7 @@ def main(event, context):
             },
             "body": json.dumps({**session_data})
         }
-    except RuntimeError as e:
+    except Exception as e:
         logger.error(e)
         return {
             "statusCode": 500,

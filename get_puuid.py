@@ -9,6 +9,14 @@ def main(event, context):
     path_params = event.get('pathParameters', {})
     game_name = path_params.get("gameName")
     tag_line = path_params.get("tagLine")
+    if tag_line is None or game_name is None:
+        return {
+            "statusCode": 400,
+            "headers": {
+                "Access-Control-Allow-Origin": "*",
+                "Access-Control-Allow-Credentials": True,
+            }
+        }
     payload = {"game_name": game_name, "tag_line": tag_line}
     try:
         request_result = requests.get(environ.get(
@@ -30,7 +38,7 @@ def main(event, context):
             },
             "body": player_puuid
         }
-    except RuntimeError as e:
+    except Exception as e:
         logger.error(e)
         return {
             "statusCode": 500,
