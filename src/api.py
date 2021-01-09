@@ -79,7 +79,7 @@ def get_session():
                 "games_played": 0,
             }
         }
-    else if region is not None:
+    else:
         session_data = json.loads(r.get(session_id).decode('utf8'))
     return process_message(session_data, r, riot_handler)
 

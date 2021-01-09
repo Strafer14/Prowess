@@ -3,7 +3,7 @@ version: "3.8"
 services:
   prowess-api:
     container_name: prowess-api
-    image: prowess
+    image: prowess:v21.1.1
     env_file:
      - ./src/.env.development
     ports:
