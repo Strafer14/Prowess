@@ -47,6 +47,7 @@ def get_puuid():
         return json.dumps({"puuid": player_puuid.get('puuid', 'Unknown')})
     except Exception as e:
         capture_exception(e)
+        return json.dumps("Error")
 
 
 @api.route('/api/v1/prowess/session', methods=['GET'])
