@@ -16,8 +16,13 @@ if environ.get("PYTHON_ENV") == "production":
         integrations=[FlaskIntegration()],
         traces_sample_rate=1.0
     )
-r = redis.Redis(host=environ.get("REDIS_HOST"), port=environ.get(
-    "REDIS_PORT"), password=environ.get("REDIS_PWD") if environ.get("PYTHON_ENV") == "production" else None db=0)
+r = redis.Redis(
+    host=environ.get("REDIS_HOST"),
+    port=environ.get(
+        "REDIS_PORT"),
+    password=environ.get("REDIS_PWD") if environ.get(
+        "PYTHON_ENV") == "production" else None,
+    db=0)
 
 riot_handler = RiotHandler()
 api = Flask(__name__)
