@@ -9,6 +9,7 @@ logger = logging.getLogger(agent)
 logger.setLevel(logging.DEBUG)
 
 # Create formatter
+# noinspection SpellCheckingInspection
 FORMAT = logging.Formatter(
     "%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 
