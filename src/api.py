@@ -1,13 +1,12 @@
-from api_service import process_message
+from api_service import update_player_data, \
+    create_initial_session_data, \
+    get_puuid
 import uuid
 import redis
 from os import environ
-from sys import exc_info
 from flask import Flask, json, request, abort
-from RiotHandler import RiotHandler
 from logger import logger
 import sentry_sdk
-from sentry_sdk import capture_exception
 from sentry_sdk.integrations.flask import FlaskIntegration
 
 if environ.get("PYTHON_ENV") == "production":
@@ -16,7 +15,7 @@ if environ.get("PYTHON_ENV") == "production":
         integrations=[FlaskIntegration()],
         traces_sample_rate=1.0
     )
-r = redis.Redis(
+redis_client = redis.Redis(
     host=environ.get("REDIS_HOST"),
     port=environ.get(
         "REDIS_PORT"),
@@ -24,7 +23,6 @@ r = redis.Redis(
         "PYTHON_ENV") == "production" else None,
     db=0)
 
-riot_handler = RiotHandler()
 api = Flask(__name__)
 
 
@@ -34,20 +32,13 @@ def get_puuid():
         json.dumps(request.args)))
     game_name = request.args.get("game_name")
     tag_line = request.args.get("tag_line")
-    try:
-        redis_puuid = r.get('{}#{}'.format(game_name, tag_line))
-        if redis_puuid is not None:
-            player_puuid = {"puuid": redis_puuid.decode('utf8')}
-        else:
-            player_puuid = riot_handler.get_puuid(game_name, tag_line)
-            if player_puuid.get("status", {}).get("status_code") is not None:
-                abort(player_puuid.get("status", {}).get("status_code"))
-            r.set('{}#{}'.format(game_name, tag_line),
-                  player_puuid.get('puuid'))
-        return json.dumps({"puuid": player_puuid.get('puuid', 'Unknown')})
-    except Exception as e:
-        capture_exception(e)
-        return json.dumps("Error")
+    redis_puuid = redis_client.get('{}#{}'.format(game_name, tag_line))
+    if redis_puuid is not None:
+        return json.dumps({"puuid": redis_puuid.decode('utf8')})
+    player_puuid = get_puuid(game_name, tag_line, abort)
+    puuid = player_puuid['puuid']
+    redis_client.set('{}#{}'.format(game_name, tag_line), puuid)
+    return json.dumps({"puuid": puuid})
 
 
 @api.route('/api/v1/prowess/session', methods=['GET'])
@@ -59,30 +50,12 @@ def get_session():
     session_id = request.args.get("session_id")
     if session_id is None:
         session_id = str(uuid.uuid4())
-        logger.info("Creating session {} for user {}".format(
-            session_id, puuid))
-        session_data = {
-            "sessionId": session_id,
-            "currentMatchInfo": {},
-            "puuid": puuid,
-            "region": region,
-            "data": {
-                "score": 0,
-                "roundsPlayed": 0,
-                "kills": 0,
-                "deaths": 0,
-                "assists": 0,
-                "playtimeMillis": 0,
-                "legshots": 0,
-                "bodyshots": 0,
-                "headshots": 0,
-                "won": 0,
-                "games_played": 0,
-            }
-        }
+        session_data = create_initial_session_data(session_id, puuid, region)
     else:
-        session_data = json.loads(r.get(session_id).decode('utf8'))
-    return process_message(session_data, r, riot_handler)
+        session_data = json.loads(redis_client.get(session_id).decode('utf8'))
+    player_data = update_player_data(session_data)
+    redis_client.set(json.loads(player_data)['sessionId'], player_data)
+    return player_data
 
 
 @api.route('/api/v1/prowess/health', methods=['GET'])
