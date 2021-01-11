@@ -2,8 +2,8 @@ import unittest
 import json
 import os
 from unittest import mock
-from src.RiotHandler import RiotHandler
-from src.api_service import distil_data
+from src.ValorantApi import ValorantApi
+from src.api_service import increment_player_stats
 
 puuid = 'EE8A-dek_wW2K9vwp7SrtdVq8GZ7glvOtKnLEL5gcO6HsOpQoFnlr2F7UMS4Nk7rO1cz-JkvaZ36YQ'
 
@@ -46,7 +46,7 @@ def mocked_requests_get(*args, **kwargs):
 class TestConsumer(unittest.TestCase):
     @mock.patch('src.RiotHandler.requests.get', side_effect=mocked_requests_get)
     def test_normal_payload_processed_correctly(self, mocked_requests_get):
-        result = distil_data({
+        result = increment_player_stats({
             "sessionId": "e7710fc8-34d2-4cea-987b-2107c4e135d0",
             "currentMatchInfo": {
                 "won": 2,
@@ -68,7 +68,7 @@ class TestConsumer(unittest.TestCase):
                 "bodyshots": 0,
                 "headshots": 0
             }
-        }, RiotHandler())
+        }, ValorantApi())
         self.assertEqual(result, {
             'sessionId': 'e7710fc8-34d2-4cea-987b-2107c4e135d0',
             'currentMatchInfo': {
@@ -95,7 +95,7 @@ class TestConsumer(unittest.TestCase):
 
     @mock.patch('src.RiotHandler.requests.get', side_effect=mocked_requests_get)
     def test_empty_payload_processed_correctly(self, mocked_requests_get):
-        self.assertRaises(KeyError, distil_data, {}, RiotHandler())
+        self.assertRaises(KeyError, increment_player_stats, {}, ValorantApi())
 
     @mock.patch('src.RiotHandler.requests.get', side_effect=mocked_requests_get)
     def test_wrong_puuid_handled_correctly(self, mocked_requests_get):
@@ -122,4 +122,4 @@ class TestConsumer(unittest.TestCase):
                 "headshots": 10
             }
         }
-        self.assertRaises(AttributeError, distil_data, payload, RiotHandler())
+        self.assertRaises(AttributeError, increment_player_stats, payload, ValorantApi())
