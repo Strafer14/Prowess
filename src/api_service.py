@@ -41,6 +41,9 @@ def increment_player_stats(parsed_body):
         if is_current_match_over is True:
             results['currentMatchInfo']['gamesPlayed'] += games_played
             results['currentMatchInfo']['won'] += games_won
+        else:
+            results['currentMatchInfo']['gamesPlayed'] = games_played
+            results['currentMatchInfo']['won'] = games_won
         return {**parsed_body, **results}
     return parsed_body
 
