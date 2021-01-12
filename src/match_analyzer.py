@@ -1,4 +1,5 @@
 from functools import reduce
+from src.logger import logger
 
 default_stats = {
     "score": 0,
@@ -22,7 +23,10 @@ def _analyze_player_score(match, puuid):
     extracted_player = _extract_relevant_player(players_data, puuid)
     # Removing abilityCasts key as it is always null
     if extracted_player.get('stats') is not None:
-        extracted_player['stats'].pop("abilityCasts")
+        try:
+            extracted_player['stats'].pop("abilityCasts")
+        except:
+            logger.warn("No abilitycasts")
         return extracted_player['stats']
     return default_stats
 

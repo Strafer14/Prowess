@@ -1,5 +1,5 @@
 import requests
-from logger import logger
+from src.logger import logger
 from os import environ
 from ratelimit import limits, sleep_and_retry
 

@@ -1,10 +1,10 @@
-from match_analyzer import get_match_results
+from src.match_analyzer import get_match_results
 
 from sentry_sdk import capture_exception
 import json
-from ValorantApi import ValorantApi
+from src.ValorantApi import ValorantApi
 from operator import itemgetter
-from logger import logger
+from src.logger import logger
 
 valorant_client = ValorantApi()
 
@@ -41,7 +41,8 @@ def increment_player_stats(parsed_body):
         if is_current_match_over is True:
             results['currentMatchInfo']['gamesPlayed'] += games_played
             results['currentMatchInfo']['won'] += games_won
-    return {**parsed_body, **results}
+        return {**parsed_body, **results}
+    return parsed_body
 
 
 def update_player_data(body):
