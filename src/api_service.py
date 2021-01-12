@@ -1,10 +1,10 @@
-from src.match_analyzer import get_match_results
+from .match_analyzer import get_match_results
 
 from sentry_sdk import capture_exception
 import json
-from src.ValorantApi import ValorantApi
+from .ValorantApi import ValorantApi
 from operator import itemgetter
-from src.logger import logger
+from .logger import logger
 
 valorant_client = ValorantApi()
 

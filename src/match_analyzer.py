@@ -1,5 +1,5 @@
 from functools import reduce
-from src.logger import logger
+from .logger import logger
 
 default_stats = {
     "score": 0,
