@@ -77,7 +77,7 @@ def create_initial_session_data(session_id, puuid, region):
     }
 
 
-def get_puuid(game_name, tag_line, abort):
+def extract_puuid(game_name, tag_line, abort):
     try:
         valorant_puuid_data = valorant_client.get_puuid(game_name, tag_line)
         if valorant_puuid_data.get('puuid') is None:

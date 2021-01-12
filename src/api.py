@@ -1,6 +1,6 @@
 from api_service import update_player_data, \
     create_initial_session_data, \
-    get_puuid
+    extract_puuid
 import uuid
 import redis
 from os import environ
@@ -35,7 +35,7 @@ def get_puuid():
     redis_puuid = redis_client.get('{}#{}'.format(game_name, tag_line))
     if redis_puuid is not None:
         return json.dumps({"puuid": redis_puuid.decode('utf8')})
-    player_puuid = get_puuid(game_name, tag_line, abort)
+    player_puuid = extract_puuid(game_name, tag_line, abort)
     puuid = player_puuid['puuid']
     redis_client.set('{}#{}'.format(game_name, tag_line), puuid)
     return json.dumps({"puuid": puuid})
