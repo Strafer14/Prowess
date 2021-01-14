@@ -37,7 +37,7 @@ def get_puuid():
         return json.dumps({"puuid": redis_puuid.decode('utf8')})
     player_puuid = extract_puuid(game_name, tag_line, abort)
     puuid = player_puuid['puuid']
-    redis_client.set('{}#{}'.format(game_name, tag_line), puuid)
+    redis_client.set('{}#{}'.format(str(game_name).lower(), str(tag_line).lower()), puuid)
     return json.dumps({"puuid": puuid})
 
 
