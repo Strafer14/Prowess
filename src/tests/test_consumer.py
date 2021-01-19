@@ -144,6 +144,33 @@ class TestConsumer(unittest.TestCase):
         self.assertEqual(result, expected_result_2)
 
     @mock.patch('src.ValorantApi.requests.get', side_effect=mocked_requests_get)
+    def test_reset_session_does_not_accumulate_previous_match(self, mocked_requests_get):
+        reset_session_data = {
+            "sessionId": "e7710fc8-34d2-4cea-987b-2107c4e135d5",
+            "currentMatchInfo": {
+                "won": 0,
+                "gamesPlayed": 0,
+                "matchId": "4ea732fd-1820-43a0-bddd-f88d912fb2ff",
+                "isCompleted": False,
+                "roundsPlayed": 0
+            },
+            "puuid": puuid,
+            "region": "EU",
+            "data": {
+                "score": 0,
+                "roundsPlayed": 0,
+                "kills": 0,
+                "deaths": 0,
+                "assists": 0,
+                "playtimeMillis": 0,
+                "legshots": 0,
+                "bodyshots": 0,
+                "headshots": 0
+            }}
+        result = increment_player_stats(reset_session_data)
+        self.assertEqual(result, reset_session_data)
+
+    @mock.patch('src.ValorantApi.requests.get', side_effect=mocked_requests_get)
     def test_empty_payload_processed_correctly(self, mocked_requests_get):
         self.assertRaises(KeyError, increment_player_stats, {})
 
