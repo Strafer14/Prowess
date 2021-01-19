@@ -7,9 +7,8 @@ from src.logger import logger
 
 def main(event, context):
     path_params = event.get('pathParameters', {})
-    game_name = path_params.get("game_name")
-    tag_line = path_params.get("tag_line")
-    if tag_line is None or game_name is None:
+    session_id = path_params.get("session_id")
+    if not session_id:
         return {
             "statusCode": 400,
             "headers": {
@@ -17,10 +16,10 @@ def main(event, context):
                 "Access-Control-Allow-Credentials": True,
             }
         }
-    payload = {"game_name": game_name, "tag_line": tag_line}
+    payload = {"session_id": session_id}
     try:
-        request_result = requests.get(environ.get(
-            "CONSUMER_API_URL") + "/api/v1/prowess/puuid", params=payload)
+        request_result = requests.put(environ.get(
+            "CONSUMER_API_URL") + "/api/v1/prowess/session", params=payload)
         if request_result.status_code == requests.codes.not_found:
             return {
                 "statusCode": 404,
@@ -29,14 +28,14 @@ def main(event, context):
                     "Access-Control-Allow-Credentials": True,
                 }
             }
-        player_puuid = request_result.text
+        session_data = request_result.json()
         return {
             "statusCode": 200,
             "headers": {
                 "Access-Control-Allow-Origin": "*",
                 "Access-Control-Allow-Credentials": True,
             },
-            "body": player_puuid
+            "body": json.dumps({**session_data})
         }
     except Exception as e:
         logger.error(e)
