@@ -48,7 +48,7 @@ def get_session():
     region = request.args.get("region")
     puuid = request.args.get("puuid")
     session_id = request.args.get("session_id")
-    if session_id is None:
+    if not session_id:
         session_id = str(uuid.uuid4())
         session_data = create_initial_session_data(session_id, puuid, region)
     else:
@@ -56,6 +56,24 @@ def get_session():
     player_data = update_player_data(session_data)
     redis_client.set(json.loads(player_data)['sessionId'], player_data)
     return player_data
+
+
+@api.route('/api/v1/prowess/session', methods=['PUT'])
+def reset_session():
+    logger.info("Received reset session request, {}".format(
+        json.dumps(request.args)))
+    session_id = request.args.get("session_id")
+    session_data = json.loads(redis_client.get(session_id).decode('utf8'))
+    initial_session_data = create_initial_session_data(session_id, session_data['puuid'], session_data['region'])
+    initial_session_data['currentMatchInfo'] = {
+        "won": 0,
+        "gamesPlayed": 0,
+        "matchId": session_data['currentMatchInfo']['matchId'],
+        "isCompleted": False,
+        "roundsPlayed": 0
+    }
+    redis_client.set(session_id, json.dumps(initial_session_data))
+    return initial_session_data
 
 
 @api.route('/api/v1/prowess/health', methods=['GET'])
