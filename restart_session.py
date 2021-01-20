@@ -6,8 +6,7 @@ from src.logger import logger
 
 
 def main(event, context):
-    path_params = event.get('pathParameters', {})
-    session_id = path_params.get("session_id")
+    session_id = event.get('queryStringParameters').get('session_id')
     if not session_id:
         return {
             "statusCode": 400,
@@ -18,9 +17,9 @@ def main(event, context):
         }
     payload = {"session_id": session_id}
     try:
-        request_result = requests.put(environ.get(
+        session_data = requests.put(environ.get(
             "CONSUMER_API_URL") + "/api/v1/prowess/session", params=payload)
-        if request_result.status_code == requests.codes.not_found:
+        if session_data.status_code == requests.codes.not_found:
             return {
                 "statusCode": 404,
                 "headers": {
@@ -28,7 +27,10 @@ def main(event, context):
                     "Access-Control-Allow-Credentials": True,
                 }
             }
-        session_data = request_result.json()
+        try:
+            session_data = session_data.json()
+        except Exception as e:
+            logger.error("Could not parse response data {}".format(str(session_data)))
         return {
             "statusCode": 200,
             "headers": {

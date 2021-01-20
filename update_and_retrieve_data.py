@@ -33,7 +33,11 @@ def main(event, context):
     logger.debug(payload)
     try:
         session_data = requests.get(environ.get(
-            "CONSUMER_API_URL") + "/api/v1/prowess/session", params=payload).json()
+            "CONSUMER_API_URL") + "/api/v1/prowess/session", params=payload)
+        try:
+            session_data = session_data.json()
+        except Exception as e:
+            logger.error("Could not parse response data {}".format(str(session_data)))
         return {
             "statusCode": 200,
             "headers": {

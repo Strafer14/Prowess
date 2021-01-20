@@ -7,8 +7,8 @@ from src.logger import logger
 
 def main(event, context):
     path_params = event.get('pathParameters', {})
-    game_name = path_params.get("game_name")
-    tag_line = path_params.get("tag_line")
+    game_name = path_params.get("gameName")
+    tag_line = path_params.get("tagLine")
     if tag_line is None or game_name is None:
         return {
             "statusCode": 400,
