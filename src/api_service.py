@@ -27,7 +27,7 @@ def increment_player_stats(parsed_body):
          games_won) = (None, False, 0, 0, 0)
     previous_data = parsed_body.get('data', {})
 
-    first_match_id = match_id if match_id is not None and game_over is False else extract_first_match(
+    first_match_id = match_id if match_id and not game_over else extract_first_match(
         valorant_client.get_matches_list(region, puuid))
     match_data = valorant_client.get_match_data(region, first_match_id)
     results = get_match_results(match_data, puuid)
