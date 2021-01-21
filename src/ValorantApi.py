@@ -1,7 +1,7 @@
 import requests
 from logger import logger
 from os import environ
-from ratelimit import limits, sleep_and_retry
+from ratelimit import limits
 
 
 class ValorantApi:
@@ -12,8 +12,7 @@ class ValorantApi:
                 "The VALORANT_API_KEY environment variable is missing")
         self.token = token
 
-    @sleep_and_retry
-    @limits(calls=10, period=60)
+    @limits(calls=100, period=60)
     def __make_request(self, url):
         logger.debug("Making request to RIOT API: {}".format(url))
         response = requests.get(url, headers={'X-Riot-Token': self.token})

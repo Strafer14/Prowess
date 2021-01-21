@@ -33,7 +33,7 @@ def get_puuid():
     game_name = request.args.get("game_name")
     tag_line = request.args.get("tag_line")
     redis_puuid = redis_client.get('{}#{}'.format(game_name, tag_line))
-    if redis_puuid is not None:
+    if not redis_puuid:
         return json.dumps({"puuid": redis_puuid.decode('utf8')})
     player_puuid = extract_puuid(game_name, tag_line, abort)
     puuid = player_puuid['puuid']
@@ -53,8 +53,8 @@ def get_session():
         session_data = create_initial_session_data(session_id, puuid, region)
     else:
         session_data = json.loads(redis_client.get(session_id).decode('utf8'))
-    player_data = update_player_data(session_data)
-    redis_client.set(json.loads(player_data)['sessionId'], player_data)
+    player_data = update_player_data(session_data, abort)
+    redis_client.set(player_data['sessionId'], player_data)
     return player_data
 
 
