@@ -54,7 +54,7 @@ def get_session():
     else:
         session_data = json.loads(redis_client.get(session_id).decode('utf8'))
     player_data = update_player_data(session_data, abort)
-    redis_client.set(player_data['sessionId'], player_data)
+    redis_client.set(player_data['sessionId'], json.dumps(player_data))
     return player_data
 
 
