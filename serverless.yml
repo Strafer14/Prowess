@@ -22,6 +22,18 @@ functions:
               paths:
                 tagLine: true
                 gameName: true
+  puuidv2:
+    handler: get_puuidv2.main
+    events:
+      - http:
+          path: api/v2/users/{region}/{game_name_with_tagline}
+          method: get
+          cors: true
+          request:
+            parameters:
+              paths:
+                region: true
+                game_name_with_tagline: true
   data:
     handler: update_and_retrieve_data.main
     events:
@@ -36,6 +48,17 @@ functions:
                 region: true
               paths:
                 puuid: true
+  datav2:
+    handler: update_and_retrieve_datav2.main
+    events:
+      - http:
+          path: api/v2/data/{session_id}
+          method: get
+          cors: true
+          request:
+            parameters:
+              paths:
+                session_id: true
   reset:
     handler: restart_session.main
     events:
