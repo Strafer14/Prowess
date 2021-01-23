@@ -17,7 +17,7 @@ def main(event, context):
                 "Access-Control-Allow-Credentials": True,
             }
         }
-    [game_name, tag_line] = game_name_with_tagline.split("#")
+    [game_name, tag_line] = game_name_with_tagline.split("_$_")
     payload = {"game_name": game_name, "tag_line": tag_line, "region": region}
     try:
         request_result = requests.get(environ.get(
