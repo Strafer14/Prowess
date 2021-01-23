@@ -41,6 +41,31 @@ def get_puuid():
     return json.dumps({"puuid": puuid})
 
 
+@api.route('/api/v2/prowess/puuid', methods=['GET'])
+def get_puuid():
+    logger.info("Received get puuid request, {}".format(
+        json.dumps(request.args)))
+    game_name = request.args.get("game_name")
+    tag_line = request.args.get("tag_line")
+    region = request.args.get("region")
+    redis_puuid = redis_client.get('{}#{}'.format(game_name, tag_line))
+    if redis_puuid:
+        puuid = redis_puuid.decode('utf8')
+        session_id = str(uuid.uuid4())
+        session_data = create_initial_session_data(session_id, puuid, region)
+        redis_client.set(session_id, json.dumps(session_data))
+        return json.dumps({"puuid": redis_puuid.decode('utf8'), "sessionId": session_id})
+    player_puuid = extract_puuid(game_name, tag_line, abort)
+    puuid = player_puuid['puuid']
+    redis_client.set('{}#{}'.format(str(game_name).lower(), str(tag_line).lower()), puuid)
+
+    session_id = str(uuid.uuid4())
+    session_data = create_initial_session_data(session_id, puuid, region)
+    redis_client.set(session_id, json.dumps(session_data))
+
+    return json.dumps({"puuid": puuid, "sessionId": session_id})
+
+
 @api.route('/api/v1/prowess/session', methods=['GET'])
 def get_session():
     logger.info("Received get session request, {}".format(
@@ -53,6 +78,17 @@ def get_session():
         session_data = create_initial_session_data(session_id, puuid, region)
     else:
         session_data = json.loads(redis_client.get(session_id).decode('utf8'))
+    player_data = update_player_data(session_data, abort)
+    redis_client.set(player_data['sessionId'], json.dumps(player_data))
+    return player_data
+
+
+@api.route('/api/v2/prowess/session', methods=['GET'])
+def get_session():
+    logger.info("Received get session request, {}".format(
+        json.dumps(request.args)))
+    session_id = request.args.get("session_id")
+    session_data = json.loads(redis_client.get(session_id).decode('utf8'))
     player_data = update_player_data(session_data, abort)
     redis_client.set(player_data['sessionId'], json.dumps(player_data))
     return player_data
