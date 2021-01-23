@@ -34,6 +34,7 @@ def increment_player_stats(parsed_body):
     results = get_match_results(match_data, puuid)
     (current_match_id, current_round_count, is_current_match_over) = itemgetter(
         'matchId', 'roundsPlayed', 'isCompleted')(results['currentMatchInfo'])
+    parsed_body["currentMatchInfo"]["isCompleted"] = is_current_match_over
     did_match_progress = current_match_id != match_id
     if did_match_progress:
         for key in results['data']:
