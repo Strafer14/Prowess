@@ -169,34 +169,63 @@ class TestConsumer(unittest.TestCase):
             }}
         result = increment_player_stats(reset_session_data)
         self.assertEqual(result, reset_session_data)
-
-    @mock.patch('src.ValorantApi.requests.get', side_effect=mocked_requests_get)
-    def test_empty_payload_processed_correctly(self, mocked_requests_get):
-        self.assertRaises(KeyError, increment_player_stats, {})
-
-    @mock.patch('src.ValorantApi.requests.get', side_effect=mocked_requests_get)
-    def test_wrong_puuid_handled_correctly(self, mocked_requests_get):
-        payload = {
-            "sessionId": "e7710fc8-34d2-4cea-987b-2107c4e135d0",
+        # Test progress one match
+        reset_session_data['puuid'] += '-2'
+        result = increment_player_stats(reset_session_data)
+        self.assertEqual(result, {
+            "sessionId": "e7710fc8-34d2-4cea-987b-2107c4e135d5",
             "currentMatchInfo": {
-                "won": 2,
-                "gamesPlayed": 2,
-                "matchId": "a937f53e-5b17-478e-a83b-8342fe242e89",
-                "isCompleted": True,
-                "roundsPlayed": 24
+                "won": 0,
+                "gamesPlayed": 0,
+                "matchId": 'd19f8cc8-9750-4cb0-a5c4-d706e9fb2608',
+                "isCompleted": False,
+                "roundsPlayed": 7
             },
-            "puuid": "mKFglzHwrBYFbj1j87AHrNsLNm1SQdpiEbNOLM-QG2Kb_Af2QJb-GKkVDQCg41tL8ACfQJpBbXVfxA",
+            "puuid": puuid + '-2',
             "region": "EU",
             "data": {
-                "score": 7668,
-                "roundsPlayed": 24,
-                "kills": 28,
-                "deaths": 16,
+                "score": 410,
+                "roundsPlayed": 7,
+                "kills": 1,
+                "deaths": 6,
                 "assists": 3,
-                "playtimeMillis": 2413246,
-                "legshots": 12,
-                "bodyshots": 63,
-                "headshots": 10
+                "playtimeMillis": 671396,
+                "legshots": 2,
+                "bodyshots": 6,
+                "headshots": 0
+            },
+            "playerInfo": {
+                "rank": 0,
+                "characterId": 'eb93336a-449b-9c1b-0a54-a891f7921d69'
+            }})
+
+        @mock.patch('src.ValorantApi.requests.get', side_effect=mocked_requests_get)
+        def test_empty_payload_processed_correctly(self, mocked_requests_get):
+            self.assertRaises(KeyError, increment_player_stats, {})
+
+        @mock.patch('src.ValorantApi.requests.get', side_effect=mocked_requests_get)
+        def test_wrong_puuid_handled_correctly(self, mocked_requests_get):
+            payload = {
+                "sessionId": "e7710fc8-34d2-4cea-987b-2107c4e135d0",
+                "currentMatchInfo": {
+                    "won": 2,
+                    "gamesPlayed": 2,
+                    "matchId": "a937f53e-5b17-478e-a83b-8342fe242e89",
+                    "isCompleted": True,
+                    "roundsPlayed": 24
+                },
+                "puuid": "mKFglzHwrBYFbj1j87AHrNsLNm1SQdpiEbNOLM-QG2Kb_Af2QJb-GKkVDQCg41tL8ACfQJpBbXVfxA",
+                "region": "EU",
+                "data": {
+                    "score": 7668,
+                    "roundsPlayed": 24,
+                    "kills": 28,
+                    "deaths": 16,
+                    "assists": 3,
+                    "playtimeMillis": 2413246,
+                    "legshots": 12,
+                    "bodyshots": 63,
+                    "headshots": 10
+                }
             }
-        }
-        self.assertRaises(AttributeError, increment_player_stats, payload)
+            self.assertRaises(AttributeError, increment_player_stats, payload)
