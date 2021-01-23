@@ -33,7 +33,7 @@ def get_puuid():
     game_name = request.args.get("game_name")
     tag_line = request.args.get("tag_line")
     redis_puuid = redis_client.get('{}#{}'.format(game_name, tag_line))
-    if not redis_puuid:
+    if redis_puuid:
         return json.dumps({"puuid": redis_puuid.decode('utf8')})
     player_puuid = extract_puuid(game_name, tag_line, abort)
     puuid = player_puuid['puuid']
