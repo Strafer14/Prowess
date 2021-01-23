@@ -42,28 +42,19 @@ def get_puuid():
 
 
 @api.route('/api/v2/prowess/puuid', methods=['GET'])
-def get_puuid():
+def get_puuid_v2():
     logger.info("Received get puuid request, {}".format(
         json.dumps(request.args)))
     game_name = request.args.get("game_name")
     tag_line = request.args.get("tag_line")
     region = request.args.get("region")
     redis_puuid = redis_client.get('{}#{}'.format(game_name, tag_line))
-    if redis_puuid:
-        puuid = redis_puuid.decode('utf8')
-        session_id = str(uuid.uuid4())
-        session_data = create_initial_session_data(session_id, puuid, region)
-        redis_client.set(session_id, json.dumps(session_data))
-        return json.dumps({"puuid": redis_puuid.decode('utf8'), "sessionId": session_id})
-    player_puuid = extract_puuid(game_name, tag_line, abort)
-    puuid = player_puuid['puuid']
-    redis_client.set('{}#{}'.format(str(game_name).lower(), str(tag_line).lower()), puuid)
-
+    puuid = redis_puuid.decode('utf8') if redis_puuid else extract_puuid(game_name, tag_line, abort)['puuid']
     session_id = str(uuid.uuid4())
     session_data = create_initial_session_data(session_id, puuid, region)
     redis_client.set(session_id, json.dumps(session_data))
-
-    return json.dumps({"puuid": puuid, "sessionId": session_id})
+    redis_client.set('{}#{}'.format(str(game_name).lower(), str(tag_line).lower()), puuid)
+    return json.dumps({"sessionId": session_id})
 
 
 @api.route('/api/v1/prowess/session', methods=['GET'])
@@ -84,7 +75,7 @@ def get_session():
 
 
 @api.route('/api/v2/prowess/session', methods=['GET'])
-def get_session():
+def get_session_v2():
     logger.info("Received get session request, {}".format(
         json.dumps(request.args)))
     session_id = request.args.get("session_id")
