@@ -82,13 +82,13 @@ def mocked_requests_get(*args, **kwargs):
         }, 200)
     elif args[0] == 'https://EU.api.riotgames.com/val/match/v1/matches/4ea732fd-1820-43a0-bddd-f88d912fb2ff':
         fileDir = os.path.dirname(os.path.realpath('__file__'))
-        filename = os.path.join(fileDir, ('..' if 'tests' in fileDir else 'src') + '/static/match_info_sample.json')
+        filename = os.path.join(fileDir, 'static/match_info_sample.json')
         match_data_open = open(filename)
         match_data = json.load(match_data_open)
         return MockResponse(match_data, 200)
     elif args[0] == 'https://EU.api.riotgames.com/val/match/v1/matches/d19f8cc8-9750-4cb0-a5c4-d706e9fb2608':
         fileDir = os.path.dirname(os.path.realpath('__file__'))
-        filename = os.path.join(fileDir, ('..' if 'tests' in fileDir else 'src') + '/static/match_info_sample2.json')
+        filename = os.path.join(fileDir, 'static/match_info_sample2.json')
         match_data_open = open(filename)
         match_data = json.load(match_data_open)
         return MockResponse(match_data, 200)
