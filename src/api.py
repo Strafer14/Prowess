@@ -2,7 +2,6 @@ from api_service import update_player_data, \
     create_initial_session_data, \
     extract_puuid
 import uuid
-import redis
 from os import environ
 from flask import Flask, json, request, abort
 from logger import logger
@@ -10,19 +9,26 @@ import sentry_sdk
 from sentry_sdk.integrations.flask import FlaskIntegration
 
 if environ.get("PYTHON_ENV") == "production":
+    import redis
+
     sentry_sdk.init(
         dsn=environ.get("SENTRY_DSN"),
         integrations=[FlaskIntegration()],
         traces_sample_rate=1.0
     )
-redis_client = redis.Redis(
-    host=environ.get("REDIS_HOST"),
-    port=environ.get(
-        "REDIS_PORT"),
-    password=environ.get("REDIS_PWD") if environ.get(
-        "PYTHON_ENV") == "production" else None,
-    db=0)
 
+    redis_client = redis.Redis(
+        host=environ.get("REDIS_HOST"),
+        port=environ.get(
+            "REDIS_PORT"),
+        password=environ.get("REDIS_PWD") if environ.get(
+            "PYTHON_ENV") == "production" else None,
+        db=0)
+else:
+    import fakeredis
+
+    server = fakeredis.FakeServer()
+    redis_client = fakeredis.FakeStrictRedis(server=server)
 api = Flask(__name__)
 
 
@@ -109,4 +115,4 @@ def get_health():
 
 
 if __name__ == '__main__':
-    api.run()
+    api.run(host='0.0.0.0', port=8000)
