@@ -63,11 +63,13 @@ def _analyze_match_metadata(match, puuid):
         'teams', []) if x['teamId'] == team_id]
     match_id = match.get("matchInfo", {}).get("matchId")
     is_completed = match.get("matchInfo", {}).get("isCompleted")
+    queue_id = match.get("matchInfo", {}).get("queueId")
     rounds_played = len(match.get("roundResults", []))
     return {
         "won": int((players_team[0] if len(players_team) > 0 else {}).get('won') == True),
         "gamesPlayed": 1,
         "matchId": match_id,
+        "queueId": queue_id,
         "isCompleted": is_completed,
         "roundsPlayed": rounds_played
     }

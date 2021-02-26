@@ -34,11 +34,11 @@ def increment_player_stats(parsed_body):
         valorant_client.get_matches_list(region, puuid))
     match_data = valorant_client.get_match_data(region, first_match_id)
     results = get_match_results(match_data, puuid)
-    (current_match_id, current_round_count, is_current_match_over) = itemgetter(
-        'matchId', 'roundsPlayed', 'isCompleted')(results['currentMatchInfo'])
+    (current_match_id, current_round_count, is_current_match_over, queue_id) = itemgetter(
+        'matchId', 'roundsPlayed', 'isCompleted', 'queueId')(results['currentMatchInfo'])
     parsed_body["currentMatchInfo"]["isCompleted"] = is_current_match_over
     did_match_progress = current_match_id != match_id
-    if did_match_progress:
+    if did_match_progress and queue_id in ['competitive', 'unrated']:
         for key in results['data']:
             old_value = previous_data.get(key, 0)
             results['data'][key] += old_value
