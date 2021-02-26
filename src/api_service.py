@@ -59,7 +59,7 @@ def update_player_data(body, abort):
     except RateLimitException as e:
         capture_exception(e)
         logger.error(
-            "An error occurred when parsing consumed message {}: {}".format(body, e))
+            "We hit the RATE LIMIT when parsing consumed message {}: {}".format(body, e))
         return body
     except Exception as e:
         capture_exception(e)
@@ -104,7 +104,31 @@ def extract_puuid(game_name, tag_line, abort):
         return valorant_puuid_data
     except RateLimitException as e:
         capture_exception(e)
+        logger.error(
+            "We hit the RATE LIMIT when parsing request: {}".format(e))
         abort(429)
     except Exception as e:
         capture_exception(e)
+        logger.error(
+            "An error occurred when parsing request: {}".format(e))
+        abort(404)
+
+
+def find_region(puuid, abort):
+    region_list = ['NA', 'EU', 'KR', 'BR', 'AP', 'LATAM']
+    try:
+        for region in region_list:
+            valorant_matches = valorant_client.get_matches_list(region, puuid)
+            if len(valorant_matches.get('history', [])) > 0:
+                return region
+    except RateLimitException as e:
+        capture_exception(e)
+        logger.error(
+            "We hit the RATE LIMIT when parsing request: {}".format(e))
+        abort(429)
+    except Exception as e:
+        capture_exception(e)
+        logger.error(
+            "An error occurred when parsing request: {}".format(e))
         abort(500)
+    abort(404)

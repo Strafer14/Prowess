@@ -1,6 +1,7 @@
 from api_service import update_player_data, \
     create_initial_session_data, \
-    extract_puuid
+    extract_puuid, \
+    find_region
 import uuid
 from os import environ
 from flask import Flask, json, request, abort
@@ -32,23 +33,8 @@ else:
 api = Flask(__name__)
 
 
-@api.route('/api/v1/prowess/puuid', methods=['GET'])
-def get_puuid():
-    logger.info("Received get puuid request, {}".format(
-        json.dumps(request.args)))
-    game_name = request.args.get("game_name")
-    tag_line = request.args.get("tag_line")
-    redis_puuid = redis_client.get('{}#{}'.format(game_name, tag_line))
-    if redis_puuid:
-        return json.dumps({"puuid": redis_puuid.decode('utf8')})
-    player_puuid = extract_puuid(game_name, tag_line, abort)
-    puuid = player_puuid['puuid']
-    redis_client.set('{}#{}'.format(str(game_name).lower(), str(tag_line).lower()), puuid)
-    return json.dumps({"puuid": puuid})
-
-
 @api.route('/api/v2/prowess/puuid', methods=['GET'])
-def get_puuid_v2():
+def get_puuid():
     logger.info("Received get puuid request, {}".format(
         json.dumps(request.args)))
     game_name = request.args.get("game_name")
@@ -56,32 +42,17 @@ def get_puuid_v2():
     region = request.args.get("region")
     redis_puuid = redis_client.get('{}#{}'.format(game_name, tag_line))
     puuid = redis_puuid.decode('utf8') if redis_puuid else extract_puuid(game_name, tag_line, abort)['puuid']
+    if not region or region == "undefined":
+        region = find_region(puuid, abort)
     session_id = str(uuid.uuid4())
     session_data = create_initial_session_data(session_id, puuid, region)
     redis_client.set(session_id, json.dumps(session_data))
     redis_client.set('{}#{}'.format(str(game_name).lower(), str(tag_line).lower()), puuid)
-    return json.dumps({"sessionId": session_id})
-
-
-@api.route('/api/v1/prowess/session', methods=['GET'])
-def get_session():
-    logger.info("Received get session request, {}".format(
-        json.dumps(request.args)))
-    region = request.args.get("region")
-    puuid = request.args.get("puuid")
-    session_id = request.args.get("session_id")
-    if not session_id:
-        session_id = str(uuid.uuid4())
-        session_data = create_initial_session_data(session_id, puuid, region)
-    else:
-        session_data = json.loads(redis_client.get(session_id).decode('utf8'))
-    player_data = update_player_data(session_data, abort)
-    redis_client.set(player_data['sessionId'], json.dumps(player_data))
-    return player_data
+    return json.dumps({"sessionId": session_id, "region": region, "puuid": puuid})
 
 
 @api.route('/api/v2/prowess/session', methods=['GET'])
-def get_session_v2():
+def get_session():
     logger.info("Received get session request, {}".format(
         json.dumps(request.args)))
     session_id = request.args.get("session_id")
@@ -89,24 +60,6 @@ def get_session_v2():
     player_data = update_player_data(session_data, abort)
     redis_client.set(player_data['sessionId'], json.dumps(player_data))
     return player_data
-
-
-@api.route('/api/v1/prowess/session', methods=['PUT'])
-def reset_session():
-    logger.info("Received reset session request, {}".format(
-        json.dumps(request.args)))
-    session_id = request.args.get("session_id")
-    session_data = json.loads(redis_client.get(session_id).decode('utf8'))
-    initial_session_data = create_initial_session_data(session_id, session_data['puuid'], session_data['region'])
-    initial_session_data['currentMatchInfo'] = {
-        "won": 0,
-        "gamesPlayed": 0,
-        "matchId": session_data['currentMatchInfo']['matchId'],
-        "isCompleted": False,
-        "roundsPlayed": 0
-    }
-    redis_client.set(session_id, json.dumps(initial_session_data))
-    return initial_session_data
 
 
 @api.route('/api/v1/prowess/health', methods=['GET'])
