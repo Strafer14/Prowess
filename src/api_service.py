@@ -11,7 +11,9 @@ valorant_client = ValorantApi()
 
 
 def extract_first_match(matches):
-    return matches.get('history', [{}])[0].get('matchId')
+    if matches.get('history') and len(matches.get('history')) > 0:
+        return matches.get('history', [{}])[0].get('matchId')
+    raise RuntimeError("The match list is empty")
 
 
 def increment_player_stats(parsed_body):
