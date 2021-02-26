@@ -30,31 +30,25 @@ def main(event, context):
         }
     payload = {"session_id": session_id}
     logger.debug(payload)
-    try:
-        session_data = requests.get(environ.get(
-            "CONSUMER_API_URL") + "/api/v2/prowess/session", params=payload)
-        try:
-            session_data = session_data.json()
-        except Exception as e:
-            logger.error("Could not parse response data {}".format(str(session_data)))
+    session_data = requests.get(environ.get(
+        "CONSUMER_API_URL") + "/api/v2/prowess/session", params=payload)
+    if session_data.status_code != requests.codes.ok:
         return {
-            "statusCode": 200,
-            "headers": {
-                "Access-Control-Allow-Origin": "*",
-                "Access-Control-Allow-Credentials": True,
-            },
-            "body": json.dumps({**session_data})
-        }
-    except Exception as e:
-        logger.error(e)
-        return {
-            "statusCode": 500,
+            "statusCode": session_data.status_code,
             "headers": {
                 "Access-Control-Allow-Origin": "*",
                 "Access-Control-Allow-Credentials": True,
             },
             "body": json.dumps({"error": "An error has occurred"})
         }
+    return {
+        "statusCode": 200,
+        "headers": {
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Credentials": True,
+        },
+        "body": session_data.text
+    }
 
 
 if __name__ == "__main__":
