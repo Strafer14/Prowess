@@ -16,6 +16,14 @@ def main(event, context):
             }
         }
     [game_name, tag_line] = game_name_with_tagline.split("_$_")
+    if not tag_line or len(tag_line) <= 1:
+        return {
+            "statusCode": 400,
+            "headers": {
+                "Access-Control-Allow-Origin": "*",
+                "Access-Control-Allow-Credentials": True,
+            }
+        }
     payload = {"game_name": game_name, "tag_line": tag_line, "region": region}
     request_result = requests.get("{}/api/v2/prowess/puuid".format(environ.get(
         "CONSUMER_API_URL")), params=payload)
