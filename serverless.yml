@@ -59,7 +59,7 @@ custom:
     include:
       - CONSUMER_API_URL
       - DISCORD_WEBHOOK
-      - CORALOGIX_PRIVATE_KEY
+      - CORALOGIX_KEY
   apiGatewayThrottling:
     maxRequestsPerSecond: 500
     maxConcurrentRequests: 100
