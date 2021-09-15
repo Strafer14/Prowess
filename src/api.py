@@ -1,13 +1,13 @@
-from api_service import update_player_data, \
-    create_initial_session_data, \
-    extract_puuid, \
-    find_region
 import uuid
 from os import environ
-from flask import Flask, json, request, abort
-from logger import logger
+
 import sentry_sdk
+from flask import Flask, abort, json, request
 from sentry_sdk.integrations.flask import FlaskIntegration
+
+from api_service import (create_initial_session_data, extract_puuid,
+                         find_region, update_player_data)
+from logger import logger
 
 if environ.get("PYTHON_ENV") == "production":
     import redis
@@ -41,13 +41,15 @@ def get_puuid():
     tag_line = request.args.get("tag_line")
     region = request.args.get("region")
     redis_puuid = redis_client.get('{}#{}'.format(game_name, tag_line))
-    puuid = redis_puuid.decode('utf8') if redis_puuid else extract_puuid(game_name, tag_line, abort)['puuid']
+    puuid = redis_puuid.decode('utf8') if redis_puuid else extract_puuid(
+        game_name, tag_line, abort)['puuid']
     if not region or region == "undefined":
         region = find_region(puuid, abort)
     session_id = str(uuid.uuid4())
     session_data = create_initial_session_data(session_id, puuid, region)
     redis_client.set(session_id, json.dumps(session_data))
-    redis_client.set('{}#{}'.format(str(game_name).lower(), str(tag_line).lower()), puuid)
+    redis_client.set('{}#{}'.format(
+        str(game_name).lower(), str(tag_line).lower()), puuid)
     return json.dumps({"sessionId": session_id, "region": region, "puuid": puuid})
 
 
@@ -56,7 +58,10 @@ def get_session():
     logger.info("Received get session request, {}".format(
         json.dumps(request.args)))
     session_id = request.args.get("session_id")
-    session_data = json.loads(redis_client.get(session_id).decode('utf8'))
+    if redis_client.get(session_id):
+        session_data = json.loads(redis_client.get(session_id).decode('utf8'))
+    else:
+        abort(404)
     player_data = update_player_data(session_data, abort)
     redis_client.set(player_data['sessionId'], json.dumps(player_data))
     return player_data

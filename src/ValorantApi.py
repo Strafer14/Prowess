@@ -1,7 +1,9 @@
-import requests
-from logger import logger
 from os import environ
+
+import requests
 from ratelimit import limits
+
+from logger import logger
 
 
 class ValorantApi:

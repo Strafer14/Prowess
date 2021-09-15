@@ -1,4 +1,5 @@
 from functools import reduce
+
 from logger import logger
 
 default_stats = {

@@ -1,6 +1,7 @@
 import json
-import requests
 from os import environ
+
+import requests
 
 
 def main(event, context):

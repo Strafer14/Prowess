@@ -1,8 +1,9 @@
-import json
-import requests
 import asyncio
+import json
 from os import environ
 from threading import Thread
+
+import requests
 
 from src.logger import logger
 

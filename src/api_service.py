@@ -1,11 +1,12 @@
-from match_analyzer import get_match_results
-
-from sentry_sdk import capture_exception
 import json
-from ValorantApi import ValorantApi
 from operator import itemgetter
-from logger import logger
+
 from ratelimit import RateLimitException
+from sentry_sdk import capture_exception
+
+from logger import logger
+from match_analyzer import get_match_results
+from ValorantApi import ValorantApi
 
 valorant_client = ValorantApi()
 

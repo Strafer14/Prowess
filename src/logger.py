@@ -1,6 +1,7 @@
 import logging
-from discord_handler import DiscordHandler
 from os import environ
+
+from discord_handler import DiscordHandler
 
 webhook_url = environ.get("DISCORD_WEBHOOK")
 agent = "Prowess"

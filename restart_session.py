@@ -1,6 +1,7 @@
 import json
-import requests
 from os import environ
+
+import requests
 
 from src.logger import logger
 
