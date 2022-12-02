@@ -6,45 +6,183 @@ frameworkVersion: "3"
 provider:
   name: aws
   runtime: python3.8
-  lambdaHashingVersion: "20201221"
+  stage: ${opt:stage, 'dev'}
+  environment:
+    REDIS_HOST:
+      "Fn::GetAtt": [ElasticCacheCluster, RedisEndpoint.Address]
+    RestApiId:  
+      Ref: HttpApi
   apiGateway:
     shouldStartNameWithService: true
+  httpApi:
+    cors: true
 
 functions:
   puuidv2:
     handler: get_puuidv2.main
+    vpc:
+      securityGroupIds:
+        - "Fn::GetAtt": [ServerlessSecurityGroup, GroupId]
+      subnetIds:
+        - Ref: PrivateSubnetA
     events:
-      - http:
-          path: api/v2/users/{region}/{game_name_with_tagline}
+      - httpApi:
+          path: /dev/api/v2/users/{region}/{game_name_with_tagline}
           method: get
-          cors: true
-          request:
-            parameters:
-              paths:
-                region: true
-                game_name_with_tagline: true
+          throttling:
+            maxRequestsPerSecond: 500
+            maxConcurrentRequests: 100
   datav2:
     handler: update_and_retrieve_datav2.main
+    vpc:
+      securityGroupIds:
+        - "Fn::GetAtt": [ServerlessSecurityGroup, GroupId]
+      subnetIds:
+        - Ref: PrivateSubnetA
     events:
-      - http:
-          path: api/v2/data/{session_id}
+      - httpApi:
+          path: /dev/api/v2/data/{session_id}
           method: get
-          cors: true
-          request:
-            parameters:
-              paths:
-                session_id: true
+          throttling:
+            maxRequestsPerSecond: 500
+            maxConcurrentRequests: 100
   reset:
     handler: restart_session.main
+    vpc:
+      securityGroupIds:
+        - "Fn::GetAtt": [ServerlessSecurityGroup, GroupId]
+      subnetIds:
+        - Ref: PrivateSubnetA
     events:
-      - http:
-          path: api/v1/data/restart
+      - httpApi:
+          path: /dev/api/v1/data/restart
           method: put
-          cors: true
-          request:
-            parameters:
-              querystrings:
-                session_id: true
+          throttling:
+            maxRequestsPerSecond: 500
+            maxConcurrentRequests: 100
+
+resources:
+  Resources:
+    VPC:
+      Type: AWS::EC2::VPC
+      Properties:
+        CidrBlock: "10.0.0.0/16"
+    IP:
+      Type: AWS::EC2::EIP
+      Properties:
+        Domain: vpc
+    InternetGateway:
+      Type: AWS::EC2::InternetGateway
+    VPCGatewayAttachment:
+      Type: AWS::EC2::VPCGatewayAttachment
+      Properties:
+        VpcId:
+          Ref: VPC
+        InternetGatewayId:
+          Ref: InternetGateway
+    NatGateway:
+      Type: AWS::EC2::NatGateway
+      Properties:
+        AllocationId:
+          Fn::GetAtt:
+            - IP
+            - AllocationId
+        SubnetId:
+          Ref: PublicSubnetA
+    PrivateSubnetA:
+      DependsOn: VPC
+      Type: AWS::EC2::Subnet
+      Properties:
+        VpcId:
+          Ref: VPC
+        AvailabilityZone: us-east-1a
+        CidrBlock: "10.0.1.0/24"
+    PublicSubnetA:
+      DependsOn: VPC
+      Type: AWS::EC2::Subnet
+      Properties:
+        VpcId:
+          Ref: VPC
+        AvailabilityZone: us-east-1a
+        CidrBlock: "10.0.2.0/24"
+    PrivateRouteTable:
+      Type: AWS::EC2::RouteTable
+      Properties:
+        VpcId:
+          Ref: VPC
+    PrivateRoute:
+      Type: AWS::EC2::Route
+      Properties:
+        RouteTableId:
+          Ref: PrivateRouteTable
+        DestinationCidrBlock: 0.0.0.0/0
+        NatGatewayId:
+          Ref: NatGateway
+    PublicRouteTable:
+      Type: AWS::EC2::RouteTable
+      Properties:
+        VpcId:
+          Ref: VPC
+    PublicRoute:
+      Type: AWS::EC2::Route
+      Properties:
+        RouteTableId:
+          Ref: PublicRouteTable
+        DestinationCidrBlock: 0.0.0.0/0
+        GatewayId:
+          Ref: InternetGateway
+    SubnetRouteTableAssociationLambdaPrivateA:
+      Type: AWS::EC2::SubnetRouteTableAssociation
+      Properties:
+        SubnetId:
+          Ref: PrivateSubnetA
+        RouteTableId:
+          Ref: PrivateRouteTable
+    SubnetRouteTableAssociationLambdaPublicA:
+      Type: AWS::EC2::SubnetRouteTableAssociation
+      Properties:
+        SubnetId:
+          Ref: PublicSubnetA
+        RouteTableId:
+          Ref: PublicRouteTable
+    ServerlessSecurityGroup:
+      DependsOn: VPC
+      Type: AWS::EC2::SecurityGroup
+      Properties:
+        GroupDescription: SecurityGroup for Serverless Functions
+        VpcId:
+          Ref: VPC
+    ServerlessStorageSecurityGroup:
+      DependsOn: VPC
+      Type: AWS::EC2::SecurityGroup
+      Properties:
+        GroupDescription: Ingress for Redis Cluster
+        VpcId:
+          Ref: VPC
+        SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: '6379'
+          ToPort: '6379'
+          SourceSecurityGroupId:
+            Ref: ServerlessSecurityGroup
+    ServerlessCacheSubnetGroup:
+      Type: AWS::ElastiCache::SubnetGroup
+      Properties:
+        Description: "Cache Subnet Group"
+        SubnetIds:
+        - Ref: PrivateSubnetA
+    ElasticCacheCluster:
+      DependsOn: ServerlessStorageSecurityGroup
+      Type: AWS::ElastiCache::CacheCluster
+      Properties:
+        AutoMinorVersionUpgrade: true
+        Engine: redis
+        CacheNodeType: ${self:custom.config.CACHE_INSTANCE_SIZE}
+        NumCacheNodes: 1
+        VpcSecurityGroupIds:
+        - "Fn::GetAtt": [ServerlessStorageSecurityGroup, GroupId]
+        CacheSubnetGroupName:
+          Ref: ServerlessCacheSubnetGroup
 
 plugins:
   - serverless-python-requirements
@@ -55,10 +193,12 @@ plugins:
 custom:
   pythonRequirements:
     dockerizePip: true
+  apiGatewayThrottling:
+    maxRequestsPerSecond: 500
+    maxConcurrentRequests: 100
   dotenv:
     include:
       - DISCORD_WEBHOOK
       - VALORANT_API_KEY
-  apiGatewayThrottling:
-    maxRequestsPerSecond: 500
-    maxConcurrentRequests: 100
+  config:
+    CACHE_INSTANCE_SIZE: cache.t3.micro
