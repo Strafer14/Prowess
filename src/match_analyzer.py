@@ -1,6 +1,5 @@
 from functools import reduce
-
-from logger import logger
+from src.logger import logger
 
 default_stats = {
     "score": 0,
@@ -26,7 +25,7 @@ def _analyze_player_score(match, puuid):
     if extracted_player.get('stats') is not None:
         try:
             extracted_player['stats'].pop("abilityCasts")
-        except:
+        except Exception:
             logger.warn("No abilitycasts")
         return extracted_player['stats']
     return default_stats
@@ -66,8 +65,9 @@ def _analyze_match_metadata(match, puuid):
     is_completed = match.get("matchInfo", {}).get("isCompleted")
     queue_id = match.get("matchInfo", {}).get("queueId")
     rounds_played = len(match.get("roundResults", []))
+    logger.info(players_team)
     return {
-        "won": int((players_team[0] if len(players_team) > 0 else {}).get('won') == True),
+        "won": int((players_team[0] if len(players_team) > 0 else {}).get('won') is True),
         "gamesPlayed": 1,
         "matchId": match_id,
         "queueId": queue_id,

@@ -1,7 +1,7 @@
 service: prowess-serverless
 app: prowess
 org: skstrafer14
-frameworkVersion: "2"
+frameworkVersion: "3"
 
 provider:
   name: aws
@@ -59,7 +59,7 @@ custom:
     include:
       - CONSUMER_API_URL
       - DISCORD_WEBHOOK
-      - CORALOGIX_KEY
+      - VALORANT_API_KEY
   apiGatewayThrottling:
     maxRequestsPerSecond: 500
     maxConcurrentRequests: 100

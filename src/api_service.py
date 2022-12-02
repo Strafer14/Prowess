@@ -1,12 +1,9 @@
 import json
 from operator import itemgetter
-
 from ratelimit import RateLimitException
-from sentry_sdk import capture_exception
-
-from logger import logger
-from match_analyzer import get_match_results
-from ValorantApi import ValorantApi
+from src.logger import logger
+from src.match_analyzer import get_match_results
+from src.ValorantApi import ValorantApi
 
 valorant_client = ValorantApi()
 
@@ -24,10 +21,10 @@ def increment_player_stats(parsed_body):
     current_match_info = parsed_body.get("currentMatchInfo", {})
     (region, puuid) = itemgetter("region", "puuid")(parsed_body)
     try:
-        (match_id, game_over, round_count, games_played, games_won) = itemgetter(
+        (match_id, game_over, games_played, games_won) = itemgetter(
             "matchId", "isCompleted", "roundsPlayed", "gamesPlayed", "won")(current_match_info)
     except KeyError:
-        (match_id, game_over, round_count, games_played,
+        (match_id, game_over, games_played,
          games_won) = (None, False, 0, 0, 0)
     previous_data = parsed_body.get('data', {})
 
@@ -58,12 +55,10 @@ def update_player_data(body, abort):
         result = increment_player_stats(body)
         return result
     except RateLimitException as e:
-        capture_exception(e)
         logger.error(
             "We hit the RATE LIMIT when parsing consumed message {}: {}".format(body, e))
         return body
     except Exception as e:
-        capture_exception(e)
         logger.error(
             "An error occurred when parsing consumed message {}: {}".format(body, e))
         abort(500)
@@ -92,30 +87,34 @@ def create_initial_session_data(session_id, puuid, region):
     }
 
 
-def extract_puuid(game_name, tag_line, abort):
+def extract_puuid(game_name, tag_line):
     try:
         valorant_puuid_data = valorant_client.get_puuid(game_name, tag_line)
         if not valorant_puuid_data.get('puuid'):
             logger.warn("Empty puuid, {}".format(valorant_puuid_data))
-            status_code = valorant_puuid_data.get("status", {}).get("status_code")
+            status_code = valorant_puuid_data.get(
+                "status", {}
+            ).get(
+                "status_code"
+            )
             if status_code is not None:
-                abort(status_code)
+                raise Exception("Empty puuid response from Riot")
         else:
-            logger.info("Retrieved puuid {} from Valorant".format(valorant_puuid_data['puuid']))
+            logger.info(
+                f"Retrieved puuid {valorant_puuid_data['puuid']} from Valorant"
+            )
         return valorant_puuid_data
     except RateLimitException as e:
-        capture_exception(e)
         logger.error(
             "We hit the RATE LIMIT when parsing request: {}".format(e))
-        abort(429)
+        raise e
     except Exception as e:
-        capture_exception(e)
         logger.error(
             "An error occurred when parsing request: {}".format(e))
-        abort(404)
+        raise e
 
 
-def find_region(puuid, abort):
+def find_region(puuid: str):
     region_list = ['NA', 'EU', 'KR', 'BR', 'AP', 'LATAM']
     try:
         for region in region_list:
@@ -123,13 +122,11 @@ def find_region(puuid, abort):
             if len(valorant_matches.get('history', [])) > 0:
                 return region
     except RateLimitException as e:
-        capture_exception(e)
         logger.error(
             "We hit the RATE LIMIT when parsing request: {}".format(e))
-        abort(429)
+        raise e
     except Exception as e:
-        capture_exception(e)
         logger.error(
             "An error occurred when parsing request: {}".format(e))
-        abort(500)
-    abort(404)
+        raise e
+    raise Exception("Could not find region")
