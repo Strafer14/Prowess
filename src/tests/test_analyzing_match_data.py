@@ -3,6 +3,7 @@ from src.match_analyzer import get_match_results
 import json
 import os
 
+
 class AnalyticsTests(unittest.TestCase):
     def test_stats_are_accurate(self):
         fileDir = os.path.dirname(os.path.realpath('__file__'))

@@ -57,7 +57,6 @@ custom:
     dockerizePip: true
   dotenv:
     include:
-      - CONSUMER_API_URL
       - DISCORD_WEBHOOK
       - VALORANT_API_KEY
   apiGatewayThrottling:

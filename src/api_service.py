@@ -21,10 +21,10 @@ def increment_player_stats(parsed_body):
     current_match_info = parsed_body.get("currentMatchInfo", {})
     (region, puuid) = itemgetter("region", "puuid")(parsed_body)
     try:
-        (match_id, game_over, games_played, games_won) = itemgetter(
+        (match_id, game_over, current_round_count, games_played, games_won) = itemgetter(
             "matchId", "isCompleted", "roundsPlayed", "gamesPlayed", "won")(current_match_info)
     except KeyError:
-        (match_id, game_over, games_played,
+        (match_id, game_over, current_round_count, games_played,
          games_won) = (None, False, 0, 0, 0)
     previous_data = parsed_body.get('data', {})
 
@@ -50,7 +50,7 @@ def increment_player_stats(parsed_body):
     return parsed_body
 
 
-def update_player_data(body, abort):
+def update_player_data(body):
     try:
         result = increment_player_stats(body)
         return result
@@ -61,7 +61,6 @@ def update_player_data(body, abort):
     except Exception as e:
         logger.error(
             "An error occurred when parsing consumed message {}: {}".format(body, e))
-        abort(500)
 
 
 def create_initial_session_data(session_id, puuid, region):
