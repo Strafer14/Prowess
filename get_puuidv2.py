@@ -41,6 +41,7 @@ def main(event, context):
         redis_puuid = redis_client.get(f"{game_name}#{tag_line}")
         puuid = redis_puuid.decode('utf8') if redis_puuid else extract_puuid(
             game_name, tag_line)['puuid']
+        # search for region
         if not region or region == "undefined":
             region = find_region(puuid)
 
@@ -65,7 +66,7 @@ def main(event, context):
             )
         }
     except Exception as e:
-        logger.error(f"Received error {e.with_traceback()}")
+        logger.error(f"Received error {e}")
         return {
             "statusCode": 500,
             "headers": {
