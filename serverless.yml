@@ -7,7 +7,7 @@ provider:
   name: aws
   runtime: python3.8
   stage: ${opt:stage, 'dev'}
-  timeout: 20
+  timeout: 300
   environment:
     REDIS_HOST:
       "Fn::GetAtt": [ElasticCacheCluster, RedisEndpoint.Address]
