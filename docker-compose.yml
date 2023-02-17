@@ -1,13 +1,6 @@
 version: "3.8"
 
 services:
-  prowess-api:
-    container_name: prowess-api
-    image: prowess:v21.1.14
-    env_file:
-     - ./src/.env.development
-    ports:
-      - "8000:8000"
   redis:
     container_name: redis
     image: redis

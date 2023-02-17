@@ -14,7 +14,7 @@ logger.setLevel(logging.DEBUG)
 FORMAT = logging.Formatter(
     "%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 
-if WEBHOOK_URL is not None:
+if WEBHOOK_URL:
     discord_handler = DiscordHandler(WEBHOOK_URL, AGENT)
     discord_handler.setLevel(logging.INFO)
     discord_handler.setFormatter(FORMAT)
