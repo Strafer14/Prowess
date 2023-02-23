@@ -41,7 +41,7 @@ def mocked_requests_get(*args, **kwargs):
         def json(self):
             return self.json_data
 
-    if args[0] == 'https://EU.api.riotgames.com/val/match/v1/matchlists/by-puuid/{}'.format(puuid):
+    if args[0] == f'https://EU.api.riotgames.com/val/match/v1/matchlists/by-puuid/{puuid}':
         response = [
             {
                 "matchId": "4ea732fd-1820-43a0-bddd-f88d912fb2ff",
@@ -58,7 +58,7 @@ def mocked_requests_get(*args, **kwargs):
             "puuid": puuid,
             "history": response,
         }, 200)
-    elif args[0] == 'https://EU.api.riotgames.com/val/match/v1/matchlists/by-puuid/{}{}'.format(puuid, '-2'):
+    elif args[0] == f'https://EU.api.riotgames.com/val/match/v1/matchlists/by-puuid/{puuid}-2':
         response = [
             {
                 "matchId": "d19f8cc8-9750-4cb0-a5c4-d706e9fb2608",

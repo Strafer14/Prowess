@@ -39,6 +39,7 @@ def main(event, context):
         redis_puuid = redis_client.get(f"{game_name}#{tag_line}")
         puuid = redis_puuid.decode('utf8') if redis_puuid else extract_puuid(
             game_name, tag_line)['puuid']
+
         # search for region
         if not region or region == "undefined":
             region = find_region(puuid)
@@ -46,8 +47,9 @@ def main(event, context):
         session_id = str(uuid.uuid4())
         session_data = create_initial_session_data(session_id, puuid, region)
         redis_client.set(session_id, json.dumps(session_data))
-        redis_client.set('{}#{}'.format(
-            str(game_name).lower(), str(tag_line).lower()), puuid)
+        lowercase_game_name = str(game_name).lower()
+        lowercase_tag_line = str(tag_line).lower()
+        redis_client.set(f'{lowercase_game_name}#{lowercase_tag_line}', puuid)
 
         return {
             "statusCode": 200,

@@ -55,12 +55,10 @@ def update_player_data(body):
         result = increment_player_stats(body)
         return result
     except RateLimitException as e:
-        logger.error(
-            "We hit the RATE LIMIT when parsing consumed message {}: {}".format(body, e))
+        logger.error(f"We hit the RATE LIMIT when parsing consumed message {body}: {e}")
         return body
     except Exception as e:
-        logger.error(
-            "An error occurred when parsing consumed message {}: {}".format(body, e))
+        logger.error(f"An error occurred when parsing consumed message {body}: {e}")
 
 
 def create_initial_session_data(session_id, puuid, region):
@@ -90,7 +88,7 @@ def extract_puuid(game_name, tag_line):
     try:
         valorant_puuid_data = valorant_client.get_puuid(game_name, tag_line)
         if not valorant_puuid_data.get('puuid'):
-            logger.warn("Empty puuid, {}".format(valorant_puuid_data))
+            logger.warn(f"Empty puuid, {valorant_puuid_data}")
             status_code = valorant_puuid_data.get(
                 "status", {}
             ).get(
@@ -104,12 +102,10 @@ def extract_puuid(game_name, tag_line):
             )
         return valorant_puuid_data
     except RateLimitException as e:
-        logger.error(
-            "We hit the RATE LIMIT when parsing request: {}".format(e))
+        logger.error(f"We hit the RATE LIMIT when parsing request: {e}")
         raise e
     except Exception as e:
-        logger.error(
-            "An error occurred when parsing request: {}".format(e))
+        logger.error(f"An error occurred when parsing request: {e}")
         raise e
 
 
@@ -121,11 +117,9 @@ def find_region(puuid: str):
             if len(valorant_matches.get('history', [])) > 0:
                 return region
     except RateLimitException as e:
-        logger.error(
-            "We hit the RATE LIMIT when parsing request: {}".format(e))
+        logger.error(f"We hit the RATE LIMIT when parsing request: {e}")
         raise e
     except Exception as e:
-        logger.error(
-            "An error occurred when parsing request: {}".format(e))
+        logger.error(f"An error occurred when parsing request: {e}")
         raise e
     raise Exception("Could not find region")
