@@ -1,15 +1,17 @@
 import json
 
+from aws_lambda_typing import context, events
+
 from src.api_service import create_initial_session_data
 from src.logger import logger
 from src.redis import create_redis_client
 
 
-def main(event, context):
+def main(event: events.APIGatewayProxyEventV2, context: context.Context):
     try:
         redis_client = create_redis_client()
 
-        session_id = event.get('queryStringParameters').get('session_id')
+        session_id = event.get('queryStringParameters', {}).get('session_id')
         if not session_id:
             return {
                 'statusCode': 400,
@@ -36,7 +38,7 @@ def main(event, context):
             'body': json.dumps(blank_player_session_data),
         }
     except Exception as e:
-        logger.error(f'Restart Session - Received error {e.with_traceback()}')
+        logger.error(f'Restart Session - Received error {e}')
         return {
             'statusCode': 500,
             'headers': {
@@ -48,4 +50,4 @@ def main(event, context):
 
 
 if __name__ == '__main__':
-    main('', '')
+    main('', '')   # type: ignore

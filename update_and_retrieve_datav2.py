@@ -1,11 +1,13 @@
 import json
 
+from aws_lambda_typing import context, events
+
 from src.api_service import update_player_data
 from src.logger import logger
 from src.redis import create_redis_client
 
 
-def main(event, context):
+def main(event: events.APIGatewayProxyEventV2, context: context.Context):
     try:
         redis_client = create_redis_client()
 
@@ -34,7 +36,7 @@ def main(event, context):
             'body': json.dumps(player_data),
         }
     except Exception as e:
-        logger.error(f'Update and Retrieve Data - Received error {e.with_traceback()}')
+        logger.error(f'Update and Retrieve Data - Received error {e}')
         return {
             'statusCode': 500,
             'headers': {
@@ -46,4 +48,4 @@ def main(event, context):
 
 
 if __name__ == '__main__':
-    main('', '')
+    main('', '')   # type: ignore
