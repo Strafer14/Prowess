@@ -99,7 +99,7 @@ def mocked_requests_get(*args, **kwargs):
 class TestConsumer(unittest.TestCase):
     maxDiff = None
 
-    @mock.patch('src.ValorantApi.requests.get', side_effect=mocked_requests_get)
+    @mock.patch('src.valorant_riot_api.requests.get', side_effect=mocked_requests_get)
     def test_normal_payload_processed_correctly(self, mocked_requests_get):
         result = increment_player_stats(default_session)
         expected_result = {
@@ -145,7 +145,7 @@ class TestConsumer(unittest.TestCase):
         result = increment_player_stats(expected_result_2)
         self.assertEqual(result, expected_result_2)
 
-    @mock.patch('src.ValorantApi.requests.get', side_effect=mocked_requests_get)
+    @mock.patch('src.valorant_riot_api.requests.get', side_effect=mocked_requests_get)
     def test_reset_session_does_not_accumulate_previous_match(self, mocked_requests_get):
         reset_session_data = {
             'sessionId': 'e7710fc8-34d2-4cea-987b-2107c4e135d5',
@@ -201,11 +201,11 @@ class TestConsumer(unittest.TestCase):
         #         'characterId': 'eb93336a-449b-9c1b-0a54-a891f7921d69',
         #     }})
 
-    @mock.patch('src.ValorantApi.requests.get', side_effect=mocked_requests_get)
+    @mock.patch('src.valorant_riot_api.requests.get', side_effect=mocked_requests_get)
     def test_empty_payload_processed_correctly(self, mocked_requests_get):
         self.assertRaises(KeyError, increment_player_stats, {})
 
-    @mock.patch('src.ValorantApi.requests.get', side_effect=mocked_requests_get)
+    @mock.patch('src.valorant_riot_api.requests.get', side_effect=mocked_requests_get)
     def test_wrong_puuid_handled_correctly(self, mocked_requests_get):
         payload = {
             'sessionId': 'e7710fc8-34d2-4cea-987b-2107c4e135d0',
