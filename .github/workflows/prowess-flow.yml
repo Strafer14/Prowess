@@ -9,7 +9,6 @@ jobs:
     strategy:
       matrix:
         python-version: [3.8]
-        node-version: [16]
 
     steps:
     - uses: actions/checkout@v2
@@ -35,6 +34,10 @@ jobs:
     if: github.ref_type == 'tag'
     needs: build
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [3.8]
+        node-version: [16]
 
     steps:
     - uses: actions/checkout@v3
