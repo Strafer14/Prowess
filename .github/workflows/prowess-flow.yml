@@ -32,6 +32,7 @@ jobs:
         PYTHON_ENV: testing
 
   deploy:
+    if: github.ref_type == 'tag'
     needs: build
     runs-on: ubuntu-latest
 
@@ -43,7 +44,3 @@ jobs:
         node-version: ${{ matrix.node-version }}
     - run: npm ci
     - run: npm run deploy
-    on:
-      push:
-        tags:
-          - '*'
