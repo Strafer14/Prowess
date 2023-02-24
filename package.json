@@ -1,6 +1,6 @@
 {
   "name": "prowess-serverless",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Prowess Valorant Stat tracking SLOBS app",
   "main": "index.js",
   "scripts": {
