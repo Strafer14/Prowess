@@ -111,7 +111,9 @@ celerybeat.pid
 node_modules
 
 # Environments
-.env.*
+.env.development
+.env.staging
+.env.production
 .venv
 env/
 venv/
