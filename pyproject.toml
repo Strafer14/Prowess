@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "prowess"
-version = "1.0.3"
+version = "1.0.4"
 description = ""
 authors = ["Michael <strafer@strafer.dev>"]
 readme = "README.md"
