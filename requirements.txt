@@ -29,6 +29,6 @@ sentry-sdk==0.19.5
 six==1.15.0
 sortedcontainers==2.3.0
 toml==0.10.1
-urllib3==1.25.11
+urllib3==1.26.5
 Werkzeug==1.0.1
 coralogix-logger==2.0.5
