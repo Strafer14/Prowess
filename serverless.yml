@@ -13,6 +13,8 @@ provider:
       "Fn::GetAtt": [ElasticCacheCluster, RedisEndpoint.Address]
     RestApiId:  
       Ref: HttpApi
+    VALORANT_API_KEY: ${env:VALORANT_API_KEY}
+    DISCORD_WEBHOOK: ${env:DISCORD_WEBHOOK}
   apiGateway:
     shouldStartNameWithService: true
   httpApi:
