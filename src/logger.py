@@ -4,6 +4,7 @@ from os import environ
 from discord_handler import DiscordHandler  # type: ignore
 
 WEBHOOK_URL = environ.get('DISCORD_WEBHOOK')
+PYTHON_ENV = environ.get('PYTHON_ENV')
 AGENT = 'Prowess'
 SUB_SYSTEM = 'api'
 
@@ -15,7 +16,7 @@ logger.setLevel(logging.DEBUG)
 FORMAT = logging.Formatter(
     '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
-if WEBHOOK_URL:
+if WEBHOOK_URL and PYTHON_ENV != 'development' and PYTHON_ENV != 'testing':
     discord_handler = DiscordHandler(WEBHOOK_URL, AGENT)
     discord_handler.setLevel(logging.INFO)
     discord_handler.setFormatter(FORMAT)

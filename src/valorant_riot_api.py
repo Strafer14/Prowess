@@ -1,9 +1,12 @@
 from os import environ
+from typing import Optional, cast
 
 import requests
 from ratelimit import limits  # type: ignore
 
 from src.logger import logger
+from src.types.riot import (ErrorStatus, GetPuuidResponse,
+                            MatchHistoryResponse, MatchResponse)
 
 
 class ValorantApi:
@@ -19,16 +22,26 @@ class ValorantApi:
         response = requests.get(url, headers={'X-Riot-Token': self.token})
         return response.json()
 
-    def get_puuid(self, game_name, tag_line):
+    def __validate_response_is_not_error(self, response):
+        status = cast(Optional[ErrorStatus], response.get('status'))
+        if status:
+            raise Exception(f"Request failed, got {status.get('message')} from Riot, status code: {status.get('status_code')}")
+
+    def get_puuid(self, game_name, tag_line) -> GetPuuidResponse:
         url = f'https://americas.api.riotgames.com/riot/account/v1/accounts/by-riot-id/{game_name}/{tag_line}'
-        return self.__make_request(url)
+        response = self.__make_request(url)
+        self.__validate_response_is_not_error(response)
+        return response
 
-    def get_matches_list(self, region, puuid):
-        # noinspection SpellCheckingInspection
+    def get_matches_list(self, region, puuid) -> MatchHistoryResponse:
         url = f'https://{region}.api.riotgames.com/val/match/v1/matchlists/by-puuid/{puuid}'
-        return self.__make_request(url)
+        response = self.__make_request(url)
+        self.__validate_response_is_not_error(response)
+        return response
 
-    def get_match_data(self, region, match_id):
-        # noinspection SpellCheckingInspection
+    def get_match_data(self, region, match_id) -> MatchResponse:
+        print(region, match_id)
         url = f'https://{region}.api.riotgames.com/val/match/v1/matches/{match_id}'
-        return self.__make_request(url)
+        response = self.__make_request(url)
+        self.__validate_response_is_not_error(response)
+        return response

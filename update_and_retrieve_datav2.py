@@ -5,6 +5,7 @@ from aws_lambda_typing import context, events
 from src.api_service import update_player_data
 from src.logger import logger
 from src.redis import create_redis_client
+from src.types.session_data import Session
 
 
 def main(event: events.APIGatewayProxyEventV2, context: context.Context):
@@ -22,7 +23,7 @@ def main(event: events.APIGatewayProxyEventV2, context: context.Context):
             }
         logger.info(f'Received get session request, {session_id}')
         if redis_client.get(session_id):
-            session_data = json.loads(redis_client.get(session_id).decode('utf8'))
+            session_data: Session = json.loads(redis_client.get(session_id).decode('utf8'))
         else:
             raise Exception("Couldn't find session data")
         player_data = update_player_data(session_data)

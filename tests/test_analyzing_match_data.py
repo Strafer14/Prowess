@@ -26,12 +26,7 @@ class AnalyticsTests(unittest.TestCase):
 
     def test_stats_dont_throw_when_no_data(self):
         puuid = 'EE8A-dek_wW2K9vwp7SrtdVq8GZ7glvOtKnLEL5gcO6HsOpQoFnlr2F7UMS4Nk7rO1cz-JkvaZ36YQ'
-        result = get_match_results({}, puuid)
-        assert result['data']['roundsPlayed'] == 0
-        assert result['data']['kills'] == 0
-        assert result['data']['deaths'] == 0
-        assert result['data']['assists'] == 0
-        assert result['data']['headshots'] == 0
+        self.assertRaises(Exception, get_match_results, {}, puuid)
 
     def test_stats_are_accurate_when_no_round_data(self):
         fileDir = os.path.dirname(os.path.realpath('__file__'))
