@@ -190,7 +190,7 @@ resources:
 plugins:
   - serverless-python-requirements
   - serverless-offline
-  - serverless-dotenv-plugin
+  # - serverless-dotenv-plugin
   - serverless-api-gateway-throttling
 
 custom:
@@ -199,9 +199,9 @@ custom:
   apiGatewayThrottling:
     maxRequestsPerSecond: 500
     maxConcurrentRequests: 100
-  dotenv:
-    include:
-      - DISCORD_WEBHOOK
-      - VALORANT_API_KEY
+  # dotenv:
+  #   include:
+  #     - DISCORD_WEBHOOK
+  #     - VALORANT_API_KEY
   config:
     CACHE_INSTANCE_SIZE: cache.t3.micro
