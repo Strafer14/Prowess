@@ -44,3 +44,8 @@ jobs:
         node-version: ${{ matrix.node-version }}
     - run: npm ci
     - run: npm run deploy
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        VALORANT_API_KEY: ${{ secrets.VALORANT_API_KEY }}
+        DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
