@@ -49,10 +49,16 @@ jobs:
       uses: actions/setup-python@v2
       with:
         python-version: ${{ matrix.python-version }}
-    - run: npm ci
+    - name: Install dependencies
+      run: |
+        npm ci
+        python -m pip install --upgrade pip
+        pip install poetry
+        poetry install -v
     - run: npm run deploy
       env:
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         VALORANT_API_KEY: ${{ secrets.VALORANT_API_KEY }}
         DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+        STAGE: dev
