@@ -1,5 +1,6 @@
 import logging
 from os import environ
+
 from discord_handler import DiscordHandler  # type: ignore
 
 WEBHOOK_URL = environ.get('DISCORD_WEBHOOK')

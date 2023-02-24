@@ -1,6 +1,8 @@
 import json
 from operator import itemgetter
+
 from ratelimit import RateLimitException  # type: ignore
+
 from src.logger import logger
 from src.match_analyzer import get_match_results
 from src.valorant_riot_api import ValorantApi

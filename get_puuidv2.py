@@ -1,17 +1,15 @@
-from src.logger import logger
 import json
 import uuid
-import redis
-from os import environ
-from src.api_service import create_initial_session_data, extract_puuid, find_region
+
+from src.api_service import (create_initial_session_data, extract_puuid,
+                             find_region)
+from src.logger import logger
+from src.redis import create_redis_client
 
 
 def main(event, context):
     try:
-        redis_host = 'localhost' if environ.get('PYTHON_ENV') == 'development' else environ.get('REDIS_HOST')
-        redis_port = environ.get('REDIS_PORT', 6379)
-        redis_password = environ.get('REDIS_PWD')
-        redis_client = redis.Redis(host=redis_host, port=redis_port, password=redis_password, db=0)
+        redis_client = create_redis_client()
 
         path_params = event.get('pathParameters', {})
         logger.info(f'Received request, {path_params}')

@@ -1,6 +1,8 @@
 from os import environ
-import redis
+
 import fakeredis
+
+import redis
 
 
 def create_redis_client():

@@ -1,6 +1,8 @@
-import requests
 from os import environ
+
+import requests
 from ratelimit import limits  # type: ignore
+
 from src.logger import logger
 
 
