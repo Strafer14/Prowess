@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [3.8, 3.9]
+        python-version: [3.8]
 
     steps:
     - uses: actions/checkout@v2
@@ -19,14 +19,13 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install flake8 nose2
-        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+        pip install poetry
+        poetry install -v
     - name: Lint with flake8
-      run: |
-        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+      run: poetry run flake8 .
+    - name: Typecheck with Mypy
+      run: poetry run mypy .
     - name: Test with pytest
-      run: nose2 -v
+      run: poetry run nose2 -v
       env:
-        VALORANT_API_KEY: ''
         PYTHON_ENV: testing

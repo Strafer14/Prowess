@@ -1,15 +1,14 @@
 import requests
 from os import environ
-from ratelimit import limits
+from ratelimit import limits  # type: ignore
 from src.logger import logger
 
 
 class ValorantApi:
     def __init__(self):
         token = environ.get('VALORANT_API_KEY')
-        if token is None and environ.get("PYTHON_ENV") != 'testing':
-            raise Exception(
-                "The VALORANT_API_KEY environment variable is missing")
+        if token is None and environ.get('PYTHON_ENV') != 'testing':
+            raise Exception('The VALORANT_API_KEY environment variable is missing')
         self.token = token
 
     @limits(calls=100, period=60)

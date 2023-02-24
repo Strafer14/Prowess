@@ -7,7 +7,7 @@ import os
 class AnalyticsTests(unittest.TestCase):
     def test_stats_are_accurate(self):
         fileDir = os.path.dirname(os.path.realpath('__file__'))
-        filename = os.path.join(fileDir, 'src/static/match_info_sample.json')
+        filename = os.path.join(fileDir, 'tests/mocks/match_info_sample.json')
         match_data_open = open(filename)
         match_data = json.load(match_data_open)
         puuid = 'EE8A-dek_wW2K9vwp7SrtdVq8GZ7glvOtKnLEL5gcO6HsOpQoFnlr2F7UMS4Nk7rO1cz-JkvaZ36YQ'
@@ -35,7 +35,7 @@ class AnalyticsTests(unittest.TestCase):
 
     def test_stats_are_accurate_when_no_round_data(self):
         fileDir = os.path.dirname(os.path.realpath('__file__'))
-        filename = os.path.join(fileDir, 'src/static/match_info_no_rounds.json')
+        filename = os.path.join(fileDir, 'tests/mocks/match_info_no_rounds.json')
         match_data_open = open(filename)
         match_data = json.load(match_data_open)
         puuid = 'EE8A-dek_wW2K9vwp7SrtdVq8GZ7glvOtKnLEL5gcO6HsOpQoFnlr2F7UMS4Nk7rO1cz-JkvaZ36YQ'
@@ -47,7 +47,7 @@ class AnalyticsTests(unittest.TestCase):
 
     def test_stats_are_accurate_when_no_player_stats(self):
         fileDir = os.path.dirname(os.path.realpath('__file__'))
-        filename = os.path.join(fileDir, 'src/static/match_info_no_stats.json')
+        filename = os.path.join(fileDir, 'tests/mocks/match_info_no_stats.json')
         match_data_open = open(filename)
         match_data = json.load(match_data_open)
         puuid = 'EE8A-dek_wW2K9vwp7SrtdVq8GZ7glvOtKnLEL5gcO6HsOpQoFnlr2F7UMS4Nk7rO1cz-JkvaZ36YQ'

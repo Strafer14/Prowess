@@ -1,6 +1,6 @@
 import json
 from operator import itemgetter
-from ratelimit import RateLimitException
+from ratelimit import RateLimitException  # type: ignore
 from src.logger import logger
 from src.match_analyzer import get_match_results
 from src.ValorantApi import ValorantApi
@@ -11,18 +11,18 @@ valorant_client = ValorantApi()
 def extract_first_match(matches):
     if matches.get('history') and len(matches.get('history')) > 0:
         return matches.get('history', [{}])[0].get('matchId')
-    raise RuntimeError("The match list is empty")
+    raise RuntimeError('The match list is empty')
 
 
 def increment_player_stats(parsed_body):
-    logger.debug("Parsing body received from api: " +
+    logger.debug('Parsing body received from api: ' +
                  json.dumps(parsed_body))
 
-    current_match_info = parsed_body.get("currentMatchInfo", {})
-    (region, puuid) = itemgetter("region", "puuid")(parsed_body)
+    current_match_info = parsed_body.get('currentMatchInfo', {})
+    (region, puuid) = itemgetter('region', 'puuid')(parsed_body)
     try:
         (match_id, game_over, current_round_count, games_played, games_won) = itemgetter(
-            "matchId", "isCompleted", "roundsPlayed", "gamesPlayed", "won")(current_match_info)
+            'matchId', 'isCompleted', 'roundsPlayed', 'gamesPlayed', 'won')(current_match_info)
     except KeyError:
         (match_id, game_over, current_round_count, games_played,
          games_won) = (None, False, 0, 0, 0)
@@ -34,7 +34,7 @@ def increment_player_stats(parsed_body):
     results = get_match_results(match_data, puuid)
     (current_match_id, current_round_count, is_current_match_over, queue_id) = itemgetter(
         'matchId', 'roundsPlayed', 'isCompleted', 'queueId')(results['currentMatchInfo'])
-    parsed_body["currentMatchInfo"]["isCompleted"] = is_current_match_over
+    parsed_body['currentMatchInfo']['isCompleted'] = is_current_match_over
     did_match_progress = current_match_id != match_id
     if did_match_progress and queue_id in ['competitive', 'unrated']:
         for key in results['data']:
@@ -55,32 +55,32 @@ def update_player_data(body):
         result = increment_player_stats(body)
         return result
     except RateLimitException as e:
-        logger.error(f"We hit the RATE LIMIT when parsing consumed message {body}: {e}")
+        logger.error(f'We hit the RATE LIMIT when parsing consumed message {body}: {e}')
         return body
     except Exception as e:
-        logger.error(f"An error occurred when parsing consumed message {body}: {e}")
+        logger.error(f'An error occurred when parsing consumed message {body}: {e}')
 
 
 def create_initial_session_data(session_id, puuid, region):
     return {
-        "sessionId": session_id,
-        "currentMatchInfo": {},
-        "playerInfo": {},
-        "puuid": puuid,
-        "region": region,
-        "data": {
-            "score": 0,
-            "roundsPlayed": 0,
-            "kills": 0,
-            "deaths": 0,
-            "assists": 0,
-            "playtimeMillis": 0,
-            "legshots": 0,
-            "bodyshots": 0,
-            "headshots": 0,
-            "won": 0,
-            "games_played": 0,
-        }
+        'sessionId': session_id,
+        'currentMatchInfo': {},
+        'playerInfo': {},
+        'puuid': puuid,
+        'region': region,
+        'data': {
+            'score': 0,
+            'roundsPlayed': 0,
+            'kills': 0,
+            'deaths': 0,
+            'assists': 0,
+            'playtimeMillis': 0,
+            'legshots': 0,
+            'bodyshots': 0,
+            'headshots': 0,
+            'won': 0,
+            'games_played': 0,
+        },
     }
 
 
@@ -88,24 +88,24 @@ def extract_puuid(game_name, tag_line):
     try:
         valorant_puuid_data = valorant_client.get_puuid(game_name, tag_line)
         if not valorant_puuid_data.get('puuid'):
-            logger.warn(f"Empty puuid, {valorant_puuid_data}")
+            logger.warn(f'Empty puuid, {valorant_puuid_data}')
             status_code = valorant_puuid_data.get(
-                "status", {}
+                'status', {},
             ).get(
-                "status_code"
+                'status_code',
             )
             if status_code is not None:
-                raise Exception("Empty puuid response from Riot")
+                raise Exception('Empty puuid response from Riot')
         else:
             logger.info(
-                f"Retrieved puuid {valorant_puuid_data['puuid']} from Valorant"
+                f"Retrieved puuid {valorant_puuid_data['puuid']} from Valorant",
             )
         return valorant_puuid_data
     except RateLimitException as e:
-        logger.error(f"We hit the RATE LIMIT when parsing request: {e}")
+        logger.error(f'We hit the RATE LIMIT when parsing request: {e}')
         raise e
     except Exception as e:
-        logger.error(f"An error occurred when parsing request: {e}")
+        logger.error(f'An error occurred when parsing request: {e}')
         raise e
 
 
@@ -117,9 +117,9 @@ def find_region(puuid: str):
             if len(valorant_matches.get('history', [])) > 0:
                 return region
     except RateLimitException as e:
-        logger.error(f"We hit the RATE LIMIT when parsing request: {e}")
+        logger.error(f'We hit the RATE LIMIT when parsing request: {e}')
         raise e
     except Exception as e:
-        logger.error(f"An error occurred when parsing request: {e}")
+        logger.error(f'An error occurred when parsing request: {e}')
         raise e
-    raise Exception("Could not find region")
+    raise Exception('Could not find region')
