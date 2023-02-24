@@ -6,6 +6,7 @@ from ratelimit import RateLimitException  # type: ignore
 from src.logger import logger
 from src.match_analyzer import get_match_results
 from src.valorant_riot_api import ValorantApi
+from src.types.session_data import Session
 
 valorant_client = ValorantApi()
 
@@ -63,7 +64,7 @@ def update_player_data(body):
         logger.error(f'An error occurred when parsing consumed message {body}: {e}')
 
 
-def create_initial_session_data(session_id, puuid, region):
+def create_initial_session_data(session_id, puuid, region) -> Session:
     return {
         'sessionId': session_id,
         'currentMatchInfo': {},

@@ -12,14 +12,14 @@ default_stats = {
 }
 
 
-def _extract_relevant_player(players_data, puuid):
+def _extract_relevant_player(players_data, puuid: str):
     relevant_player_list = [x for x in players_data if x.get('puuid') == puuid]
     if len(relevant_player_list) > 0:
         return relevant_player_list[0]
     return {}
 
 
-def _analyze_player_score(match, puuid):
+def _analyze_player_score(match, puuid: str):
     players_data = match.get('players', [])
     extracted_player = _extract_relevant_player(players_data, puuid)
     # Removing abilityCasts key as it is always null
@@ -32,14 +32,14 @@ def _analyze_player_score(match, puuid):
     return default_stats
 
 
-def _get_player_info(match, puuid):
+def _get_player_info(match, puuid: str):
     players_data = match.get('players', [])
     extracted_player = _extract_relevant_player(players_data, puuid)
     rank = extracted_player.get('competitiveTier')
     return {'rank': rank, 'characterId': extracted_player.get('characterId')}
 
 
-def _analyze_player_aim(match, puuid):
+def _analyze_player_aim(match, puuid: str):
     def reduce_results(acc, val):
         players = val['playerStats']
         relevant_player = _extract_relevant_player(players, puuid)
@@ -56,7 +56,7 @@ def _analyze_player_aim(match, puuid):
     })
 
 
-def _analyze_match_metadata(match, puuid):
+def _analyze_match_metadata(match, puuid: str):
     players_data = match.get('players', [])
     relevant_player = _extract_relevant_player(players_data, puuid)
     team_id = relevant_player.get('teamId')
@@ -77,7 +77,7 @@ def _analyze_match_metadata(match, puuid):
     }
 
 
-def get_match_results(match, puuid):
+def get_match_results(match, puuid: str):
     match_overview_results = _analyze_player_score(match, puuid)
     match_rounds_results = _analyze_player_aim(match, puuid)
     match_metadata = _analyze_match_metadata(match, puuid)
