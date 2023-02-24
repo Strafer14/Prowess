@@ -13,6 +13,7 @@ redis = "3.5.3"
 requests = "2.28.2"
 aws-lambda-typing = "2.16.4"
 fakeredis = "2.2.0"
+typing-extensions = "4.5.0"
 
 [tool.poetry.group.test.dependencies]
 nose2 = "^0.12.0"
