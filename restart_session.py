@@ -1,53 +1,33 @@
 import json
+from typing import cast
 
 from aws_lambda_typing import context, events
 
-from src.api_service import create_initial_session_data
+from src.api_utils import build_error_response, build_response
+from src.dynamodb import get_session_data, set_session_data
 from src.logger import logger
-from src.redis import create_redis_client
 from src.types.session_data import Session
+from src.valorant_data_parsing import create_initial_session_data
 
 
 def main(event: events.APIGatewayProxyEventV2, context: context.Context):
     try:
-        redis_client = create_redis_client()
-
         session_id = event.get('queryStringParameters', {}).get('session_id')
         if not session_id:
-            return {
-                'statusCode': 400,
-                'headers': {
-                    'Access-Control-Allow-Origin': '*',
-                    'Access-Control-Allow-Credentials': True,
-                },
-            }
-        if redis_client.get(session_id):
-            session_data: Session = json.loads(redis_client.get(session_id).decode('utf8'))
+            return build_response(400, {'error': 'Bad Request'})
+        if found_session := get_session_data(session_id).get('Item', {}).get('gameData', {}).get('S'):
+            session_data: Session = json.loads(found_session)
         else:
-            raise Exception("Couldn't find session data")
+            return build_response(404, {'error': "Couldn't find session data"})
         blank_player_session_data = create_initial_session_data(
             session_data['sessionId'],
             session_data['puuid'],
             session_data['region'])
-        redis_client.set(session_data['sessionId'], json.dumps(blank_player_session_data))
-        return {
-            'statusCode': 200,
-            'headers': {
-                'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Credentials': True,
-            },
-            'body': json.dumps(blank_player_session_data),
-        }
+        set_session_data(session_data['sessionId'], blank_player_session_data)
+        return build_response(200, cast(dict, blank_player_session_data))
     except Exception as e:
         logger.error(f'Restart Session - Received error {e}')
-        return {
-            'statusCode': 500,
-            'headers': {
-                'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Credentials': True,
-            },
-            'body': json.dumps({'error': 'An error has occurred'}),
-        }
+        return build_error_response()
 
 
 if __name__ == '__main__':
