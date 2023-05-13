@@ -2,7 +2,7 @@ version: "3.8"
 
 services:
   redis:
-    container_name: redis
-    image: redis
+    container_name: dynamodb
+    image: amazon/dynamodb-local
     ports:
-      - "6379:6379"
+      - "8000:8000"
