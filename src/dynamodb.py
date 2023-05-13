@@ -1,13 +1,18 @@
 import json
-import os
+from os import environ
 
 import boto3
 
 from src.types.session_data import Session
 
-SESSIONS_TABLE = os.environ['SESSIONS_TABLE']
-PUUID_TABLE = os.environ['PUUID_TABLE']
-client = boto3.client('dynamodb', region_name='localhost', endpoint_url='http://localhost:8000')
+SESSIONS_TABLE = environ['SESSIONS_TABLE']
+PUUID_TABLE = environ['PUUID_TABLE']
+PYTHON_ENV = environ.get('PYTHON_ENV')
+
+if PYTHON_ENV == 'development':
+    client = boto3.client('dynamodb', region_name='localhost', endpoint_url='http://localhost:8000')
+else:
+    client = boto3.client('dynamodb')
 
 
 def get_session_data(session_id: str):
