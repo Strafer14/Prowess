@@ -40,7 +40,6 @@ class ValorantApi:
         return response
 
     def get_match_data(self, region, match_id) -> MatchResponse:
-        print(region, match_id)
         url = f'https://{region}.api.riotgames.com/val/match/v1/matches/{match_id}'
         response = self.__make_request(url)
         self.__validate_response_is_not_error(response)
