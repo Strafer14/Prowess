@@ -1,8 +1,9 @@
-import unittest
 import json
 import os
+import unittest
 from unittest import mock
-from src.api_service import increment_player_stats
+
+from src.valorant_data_parsing import increment_player_stats
 
 puuid = 'EE8A-dek_wW2K9vwp7SrtdVq8GZ7glvOtKnLEL5gcO6HsOpQoFnlr2F7UMS4Nk7rO1cz-JkvaZ36YQ'
 default_session = {
