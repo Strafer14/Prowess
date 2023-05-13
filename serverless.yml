@@ -36,11 +36,6 @@ provider:
 functions:
   puuidv2:
     handler: get_puuidv2.main
-    vpc:
-      securityGroupIds:
-        - "Fn::GetAtt": [ServerlessSecurityGroup, GroupId]
-      subnetIds:
-        - Ref: PrivateSubnetA
     events:
       - httpApi:
           path: /dev/api/v2/users/{region}/{game_name_with_tagline}
@@ -50,11 +45,6 @@ functions:
             maxConcurrentRequests: 100
   datav2:
     handler: update_and_retrieve_datav2.main
-    vpc:
-      securityGroupIds:
-        - "Fn::GetAtt": [ServerlessSecurityGroup, GroupId]
-      subnetIds:
-        - Ref: PrivateSubnetA
     events:
       - httpApi:
           path: /dev/api/v2/data/{session_id}
@@ -64,11 +54,6 @@ functions:
             maxConcurrentRequests: 100
   reset:
     handler: restart_session.main
-    vpc:
-      securityGroupIds:
-        - "Fn::GetAtt": [ServerlessSecurityGroup, GroupId]
-      subnetIds:
-        - Ref: PrivateSubnetA
     events:
       - httpApi:
           path: /dev/api/v1/data/restart
