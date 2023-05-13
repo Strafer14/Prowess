@@ -9,16 +9,29 @@ provider:
   stage: ${opt:stage, 'dev'}
   timeout: 15
   environment:
-    REDIS_HOST:
-      "Fn::GetAtt": [ElasticCacheCluster, RedisEndpoint.Address]
     RestApiId:  
       Ref: HttpApi
     VALORANT_API_KEY: ${env:VALORANT_API_KEY}
     DISCORD_WEBHOOK: ${env:DISCORD_WEBHOOK}
+    SESSIONS_TABLE: ${self:custom.sessionTableName}
+    PUUID_TABLE: ${self:custom.puuidTableName}
   apiGateway:
     shouldStartNameWithService: true
   httpApi:
     cors: true
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:Query
+        - dynamodb:Scan
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
+      Resource:
+        - { "Fn::GetAtt": ["SessionDynamoDBTable", "Arn" ] }
+        - { "Fn::GetAtt": ["PuuidDynamoDBTable", "Arn" ] }
+
 
 functions:
   puuidv2:
@@ -66,142 +79,43 @@ functions:
 
 resources:
   Resources:
-    VPC:
-      Type: AWS::EC2::VPC
+    SessionDynamoDBTable:
+      Type: AWS::DynamoDB::Table
       Properties:
-        CidrBlock: "10.0.0.0/16"
-    IP:
-      Type: AWS::EC2::EIP
+        TableName: ${self:custom.sessionTableName}
+        AttributeDefinitions:
+          - AttributeName: sessionId
+            AttributeType: S
+        KeySchema:
+          - AttributeName: sessionId
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+    PuuidDynamoDBTable:
+      Type: AWS::DynamoDB::Table
       Properties:
-        Domain: vpc
-    InternetGateway:
-      Type: AWS::EC2::InternetGateway
-    VPCGatewayAttachment:
-      Type: AWS::EC2::VPCGatewayAttachment
-      Properties:
-        VpcId:
-          Ref: VPC
-        InternetGatewayId:
-          Ref: InternetGateway
-    NatGateway:
-      Type: AWS::EC2::NatGateway
-      Properties:
-        AllocationId:
-          Fn::GetAtt:
-            - IP
-            - AllocationId
-        SubnetId:
-          Ref: PublicSubnetA
-    PrivateSubnetA:
-      DependsOn: VPC
-      Type: AWS::EC2::Subnet
-      Properties:
-        VpcId:
-          Ref: VPC
-        AvailabilityZone: us-east-1a
-        CidrBlock: "10.0.1.0/24"
-    PublicSubnetA:
-      DependsOn: VPC
-      Type: AWS::EC2::Subnet
-      Properties:
-        VpcId:
-          Ref: VPC
-        AvailabilityZone: us-east-1a
-        CidrBlock: "10.0.2.0/24"
-    PrivateRouteTable:
-      Type: AWS::EC2::RouteTable
-      Properties:
-        VpcId:
-          Ref: VPC
-    PrivateRoute:
-      Type: AWS::EC2::Route
-      Properties:
-        RouteTableId:
-          Ref: PrivateRouteTable
-        DestinationCidrBlock: 0.0.0.0/0
-        NatGatewayId:
-          Ref: NatGateway
-    PublicRouteTable:
-      Type: AWS::EC2::RouteTable
-      Properties:
-        VpcId:
-          Ref: VPC
-    PublicRoute:
-      Type: AWS::EC2::Route
-      Properties:
-        RouteTableId:
-          Ref: PublicRouteTable
-        DestinationCidrBlock: 0.0.0.0/0
-        GatewayId:
-          Ref: InternetGateway
-    SubnetRouteTableAssociationLambdaPrivateA:
-      Type: AWS::EC2::SubnetRouteTableAssociation
-      Properties:
-        SubnetId:
-          Ref: PrivateSubnetA
-        RouteTableId:
-          Ref: PrivateRouteTable
-    SubnetRouteTableAssociationLambdaPublicA:
-      Type: AWS::EC2::SubnetRouteTableAssociation
-      Properties:
-        SubnetId:
-          Ref: PublicSubnetA
-        RouteTableId:
-          Ref: PublicRouteTable
-    ServerlessSecurityGroup:
-      DependsOn: VPC
-      Type: AWS::EC2::SecurityGroup
-      Properties:
-        GroupDescription: SecurityGroup for Serverless Functions
-        VpcId:
-          Ref: VPC
-    ServerlessStorageSecurityGroup:
-      DependsOn: VPC
-      Type: AWS::EC2::SecurityGroup
-      Properties:
-        GroupDescription: Ingress for Redis Cluster
-        VpcId:
-          Ref: VPC
-        SecurityGroupIngress:
-        - IpProtocol: tcp
-          FromPort: '6379'
-          ToPort: '6379'
-          SourceSecurityGroupId:
-            Ref: ServerlessSecurityGroup
-    ServerlessCacheSubnetGroup:
-      Type: AWS::ElastiCache::SubnetGroup
-      Properties:
-        Description: "Cache Subnet Group"
-        SubnetIds:
-        - Ref: PrivateSubnetA
-    ElasticCacheCluster:
-      DependsOn: ServerlessStorageSecurityGroup
-      Type: AWS::ElastiCache::CacheCluster
-      Properties:
-        AutoMinorVersionUpgrade: true
-        Engine: redis
-        CacheNodeType: ${self:custom.config.CACHE_INSTANCE_SIZE}
-        NumCacheNodes: 1
-        VpcSecurityGroupIds:
-        - "Fn::GetAtt": [ServerlessStorageSecurityGroup, GroupId]
-        CacheSubnetGroupName:
-          Ref: ServerlessCacheSubnetGroup
+        TableName: ${self:custom.puuidTableName}
+        AttributeDefinitions:
+          - AttributeName: playerIdentity
+            AttributeType: S
+        KeySchema:
+          - AttributeName: playerIdentity
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
 
 plugins:
   - serverless-python-requirements
   - serverless-offline
-  # - serverless-dotenv-plugin
   - serverless-api-gateway-throttling
 
 custom:
+  sessionTableName: 'sessions-table-${self:provider.stage}'
+  puuidTableName: 'puuid-table-${self:provider.stage}'
   pythonRequirements:
     dockerizePip: true
   apiGatewayThrottling:
     maxRequestsPerSecond: 500
     maxConcurrentRequests: 100
-  # dotenv:
-  #   include:
-  #     - DISCORD_WEBHOOK
-  #     - VALORANT_API_KEY
-  config:
-    CACHE_INSTANCE_SIZE: cache.t3.micro
